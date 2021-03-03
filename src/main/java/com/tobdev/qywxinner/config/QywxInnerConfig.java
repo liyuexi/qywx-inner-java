@@ -70,44 +70,39 @@ public class QywxInnerConfig {
 
 
     // H5应用
-    //scope应用授权作用域。
-    //snsapi_base：静默授权，可获取成员的基础信息（UserId与DeviceId）；
-    //snsapi_userinfo：静默授权，可获取成员的详细信息，但不包含手机、邮箱等敏感信息；
-    //snsapi_privateinfo：手动授权，可获取成员的详细信息，包含手机、邮箱等敏感信息（已不再支持获取手机号/邮箱）。
-    //https://work.weixin.qq.com/api/doc/90001/90143/91120
-    private String oauthUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s#wechat_redirect";
-    //https://work.weixin.qq.com/api/doc/90001/90143/91121
-    private String oauthUserUrl = serviceUrl+"getuserinfo3rd?suite_access_token=%s&code=%s";
-    //https://work.weixin.qq.com/api/doc/90001/90143/91122
-    private String oauthUserDetailUrl = serviceUrl+"getuserdetail3rd?suite_access_token=%s";
-    //https://work.weixin.qq.com/api/doc/90001/90144/90539
+    //scope	是	应用授权作用域。企业自建应用固定填写：snsapi_base
+    // https://open.work.weixin.qq.com/api/doc/90000/90135/91020
+    private String oauthUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_base&state=%s#wechat_redirect";
+    //https://open.work.weixin.qq.com/api/doc/90000/90135/91023
+    private String oauthUserUrl = baseUrl+"user/getuserinfo?access_token=%s&code=%s";
+
+    //https://work.weixin.qq.com/api/doc/90000/90136/90506
     private String jsapiTicketUrl = baseUrl+"get_jsapi_ticket?access_token=%s";
-    //https://work.weixin.qq.com/api/doc/90001/90144/90539#%E8%8E%B7%E5%8F%96%E5%BA%94%E7%94%A8%E7%9A%84jsapi_ticket
     private String jsapiTicketAgentUrl = baseUrl+"ticket/get?access_token=%s&type=agent_config";
 
     //家校沟通
-    //https://open.work.weixin.qq.com/api/doc/90001/90143/92291
+    //https://work.weixin.qq.com/api/doc/90000/90135/91638
     private String extContactMessageSendUrl = baseUrl+"externalcontact/message/send?access_token=%s";
 
-    //此oauth与H5oauth一致  https://work.weixin.qq.com/api/doc/90001/90143/91861
+    //此oauth与H5oauth一致  https://work.weixin.qq.com/api/doc/90000/90135/91857
     private String schoolOauthUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s#wechat_redirect";
-    //https://work.weixin.qq.com/api/doc/90001/90143/91711
-    private String schoolOauthUserUrl = serviceUrl+"getuserinfo3rd?suite_access_token=%s&code=%s";
+    //https://work.weixin.qq.com/api/doc/90000/90135/91707
+    private String schoolOauthUserUrl = "user/getuserinfo?access_token=%s&code=%s";
 
     private String schoolUrl = baseUrl+"school/";
-    //https://work.weixin.qq.com/api/doc/90001/90143/92038
+    //https://work.weixin.qq.com/api/doc/90000/90135/92337
     private String schoolUserGetUrl = schoolUrl+"user/get?access_token=%s&userid=%s";
-    //https://work.weixin.qq.com/api/doc/90001/90143/92299
+    //https://work.weixin.qq.com/api/doc/90000/90135/92343
     private String schoolDepartmentListUrl = schoolUrl+"department/list?access_token=%s&id=%s";
-    //https://work.weixin.qq.com/api/doc/90001/90143/92043
+    //https://work.weixin.qq.com/api/doc/90000/90135/92446
     private String schoolUserListUrl = schoolUrl+"user/list?access_token=%s&department_id=%s&fetch_child=%s";
 
 
 
     //小程序应用
-    //小程序登录流程 https://work.weixin.qq.com/api/doc/90001/90144/92427
-    //code2Session https://work.weixin.qq.com/api/doc/90001/90144/92423
-    private String code2sessionUrl = serviceUrl+"miniprogram/jscode2session?suite_access_token=%s&js_code=%s&grant_type=authorization_code";
+    //小程序登录流程 https://work.weixin.qq.com/api/doc/90000/90136/92426
+    //code2Session https://work.weixin.qq.com/api/doc/90000/90136/91507
+    private String code2sessionUrl = baseUrl+"miniprogram/jscode2session?access_token=%s&js_code=%s&grant_type=authorization_code";
 
 
     public String getProviderSecret() {
