@@ -11,7 +11,7 @@ spring:
             port: 35729
     datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: jdbc:mysql://localhost:3306/qywx_third_demo?useUnicode=true&characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://localhost:3306/qywx_inner_demo?useUnicode=true&characterEncoding=utf-8&useSSL=false
         username: root
         password:
 
@@ -40,21 +40,8 @@ mybatis:
         ##mapper扫码路径
     mapper-locations: classpath:mapper/*.xml
     ##xml配置别名
-    type-aliases-package: com.tobdev.qywxthird.model.entity
+    type-aliases-package: com.tobdev.qywxinner.model.entity
 
-#小程序
-qywx-third:
-    corpId: "wwae6d661c97e24e98"
-    providerSecret: "Vb316P2abRv8isjpbHvvXFPG5DgbVdVmCPqZqjWoZt1j9VcV7e2A67t2a1YlxlAg"
-    suiteId: "wwe3797cc64e30841d"
-    suiteSecret: "YTc48b2ty7-arlb2xh_mnXvA1WHwNz9A6zw0Y76MJdo"
-    token: "qtCHOC567CuzcB4t6Ubk9OOHA5"
-    encodingAESKey: "ipVVBGomqILmvc6cjSBHFTKUa9yWOAKPbGKf93gW5QX"
-    authType: 1
-    #推广码id 需先上线
-    templateId: ""
-    #审批流程引擎 审批模板id
-    approvalFlowId: "58f08820708c9ba41dae790956982941_691929339"
 
 qywx-cache:
     keyPrefix: "xcx-"

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 
@@ -30,9 +31,10 @@ public class XcxController {
 
     @RequestMapping("/xcx/login")
     @ResponseBody()
-    public Map oauthCallback(@RequestParam("code") String code){
+    public Map oauthCallback(HttpServletRequest request, @RequestParam("code") String code){
         //通过code获取信息
-        Map result = QywxInnerService.getCode2sessionUser(code);
+        String corpId = (String) request.getAttribute("corp_id");
+        Map result = qywxInnerService.getCode2sessionUser(corpId,code);
         return  result;
 
     }

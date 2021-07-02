@@ -38,12 +38,12 @@ public class OaController {
         Map signConig = qywxInnerService.getJsSign(corpId,nonce,timestamp,url);
         model.addAttribute("signConfig",signConig);
 
-        Map signAgentConig = QywxInnerService.getJsSignAgent(corpId,nonce,timestamp,url);
+        Map signAgentConig = qywxInnerService.getJsSignAgent(corpId,nonce,timestamp,url);
         System.out.println(signAgentConig);
         model.addAttribute("signAgentConfig",signAgentConig);
 
         //审批流程
-        Map approval = QywxInnerService.getApprovalFlow();
+        Map approval = qywxInnerService.getApprovalFlow();
         System.out.println(approval.toString());
         model.addAttribute("templateId" ,  approval.get("templateId"));
         model.addAttribute("thirdNo"  ,  approval.get("thirdNo"));
@@ -61,7 +61,7 @@ public class OaController {
         String userId = (String) request.getAttribute("user_id");
         String corpId = (String) request.getAttribute("corp_id");
 
-        return  QywxInnerService.getApprovalFlowStatus(corpId,thirdNo);
+        return  qywxInnerService.getApprovalFlowStatus(corpId,thirdNo);
     }
 
 

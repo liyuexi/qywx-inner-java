@@ -1,8 +1,13 @@
 package com.tobdev.qywxinner.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tobdev.qywxinner.config.QywxCacheConfig;
+import com.tobdev.qywxinner.config.QywxInnerConfig;
 import com.tobdev.qywxinner.model.entity.QywxInnerCompany;
+import com.tobdev.qywxinner.utils.QywxSHA;
 import com.tobdev.qywxinner.utils.RedisUtils;
+import com.tobdev.qywxinner.utils.RestUtils;
+import com.tobdev.qywxinner.utils.SnowFlakeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,36 +25,25 @@ public class QywxInnerService {
     private final static Logger logger = LoggerFactory.getLogger("test");
 
     @Autowired
-    private QywxInnerService qywxInnerConfig;
+    private QywxInnerConfig qywxInnerConfig;
     @Autowired
     private QywxCacheConfig qywxCacheConfig;
-
+    @Autowired
+    private QywxInnerCompanyService qywxInnerCompanyService;
+    
     @Autowired
     private RedisUtils strRedis;
 
 
-    public String getCorpAccessToken(String corpId){
+    public String getAccessToken(String corpId){
         
         String result = "";
-        QywxInnerCompany company;
-        QywxInnerCompany getRs = this.getCompanyByCorpId(corpId);
-        if(getRs!=null){
-            company = getRs;
-        }else{
-            logger.info("无授权公司信息");
-            return  "";
-        }
+        QywxInnerCompany company = qywxInnerCompanyService.getCompanyByCorpId(corpId);
 
-        logger.info(company.toString());
-        String  suiteToken = qywxInnerService.getSuiteToken();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        JSONObject postJson = new JSONObject();
-        postJson.put("auth_corpid",company.getCorpId());
-        postJson.put("permanent_code",company.getPermanentCode());
+        String agentSecret = company.getAgentSecret();
 
-        String  corpTokenUrl =  String.format(qywxThirdConfig.getCorpTokenUrl(),suiteToken);
-        Map response = RestUtils.post(corpTokenUrl,postJson );
+        String  accessTokenUrl =  String.format(qywxInnerConfig.getAccessTokenUrl(),corpId,agentSecret);
+        Map response = RestUtils.get(accessTokenUrl );
         //获取错误日志
         if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
             logger.error(response.toString());
@@ -62,14 +56,13 @@ public class QywxInnerService {
     }
 
 
-
     public Map getDepartmentList(String corpId){
 
-        String corpToken = getCorpAccessToken(corpId);
+        String accessToken = getAccessToken(corpId);
 //        if(id != "0"){
 //            paramsMap.put("id",id);
 //        }
-        String url = String.format(qywxInnerConfig.getDepartmentUrl(),corpToken);
+        String url = String.format(qywxInnerConfig.getDepartmentUrl(),accessToken);
         Map response = RestUtils.get(url);
         //获取错误日志
         logger.error(response.toString());
@@ -82,12 +75,12 @@ public class QywxInnerService {
 
     public Map getUserSimplelist(String corpId,String id,String fetch_child){
 
-        String corpToken = getCorpAccessToken(corpId);
+        String accessToken = getAccessToken(corpId);
 //        Map paramsMap = new HashMap();
-//        paramsMap.put("access_token",corpToken);
+//        paramsMap.put("access_token",accessToken);
 //        paramsMap.put("department_id",id);
 //        paramsMap.put("fetch_child",fetch_child);
-        String url =String.format(qywxInnerConfig.getUserSimplelistUrl(),corpToken,id,fetch_child);
+        String url =String.format(qywxInnerConfig.getUserSimplelistUrl(),accessToken,id,fetch_child);
         Map response = RestUtils.get(url);
         //获取错误日志
         if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
@@ -100,11 +93,11 @@ public class QywxInnerService {
 
 
         //获取jsticket
-        String corpToken = getCorpAccessToken(corpId);
+        String accessToken = getAccessToken(corpId);
 
 //        Map paramsMap = new HashMap();
-//        paramsMap.put("access_token",corpToken);
-        String url = String.format(qywxInnerConfig.getJsapiTicketUrl(),corpToken);
+//        paramsMap.put("access_token",accessToken);
+        String url = String.format(qywxInnerConfig.getJsapiTicketUrl(),accessToken);
         Map response = RestUtils.get(url);
         //获取错误日志
         logger.error(response.toString());
@@ -126,8 +119,8 @@ public class QywxInnerService {
     //**********************************  客户联系相关   *************************//
     //获取配置了客户联系功能的成员列表
     public Map getExtContactFollowUserList(String corpId){
-        String corpToken = this.getCorpAccessToken(corpId);
-        String url = String.format(qywxInnerConfig.getExtContactFollowUserListUrl(),corpToken) ;
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactFollowUserListUrl(),accessToken) ;
         JSONObject response = RestUtils.get(url);
         //获取错误日志
         if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
@@ -140,8 +133,8 @@ public class QywxInnerService {
     //获取指定成员添加的客户列表
     public Map getExtContactList(String corpId,String userId){
 
-        String corpToken = this.getCorpAccessToken(corpId);
-        String url = String.format(qywxInnerConfig.getExtContactListUrl(),corpToken,userId) ;
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactListUrl(),accessToken,userId) ;
 
         JSONObject response = RestUtils.get(url);
         //获取错误日志
@@ -152,13 +145,12 @@ public class QywxInnerService {
 
     }
 
-
     //获取配置过客户群管理的客户群列表。
     public Map getExtContactGroupchatList(String corpId,String userId){
 
         //https://open.work.weixin.qq.com/api/doc/90001/90143/93414
-        String corpToken = this.getCorpAccessToken(corpId);
-        String url = String.format(qywxInnerConfig.getExtContactGroupchatUrl(),corpToken) ;
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactGroupchatUrl(),accessToken) ;
 
         //分页，预期请求的数据量，取值范围 1 ~ 1000  测试写死1000
         JSONObject postJson = new JSONObject();
@@ -180,11 +172,11 @@ public class QywxInnerService {
     public Map sendMessageText(String corpId,String userId,String text){
 
         //https://open.work.weixin.qq.com/api/doc/90001/90143/93414
-        String corpToken = this.getCorpAccessToken(corpId);
+        String accessToken = this.getAccessToken(corpId);
 
-        String url = String.format(qywxInnerConfig.getMessageSendUrl(),corpToken) ;
+        String url = String.format(qywxInnerConfig.getMessageSendUrl(),accessToken) ;
         //获取企业的agentid
-        QywxInnerCompany company =  this.getCompanyByCorpId(corpId);
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
         Integer agentId = company.getAgentId();
 
         JSONObject postJson = new JSONObject();
@@ -220,8 +212,8 @@ public class QywxInnerService {
 
     //**********************************  素材管理相关   *************************//
     public  byte[] downloadMedia(String corpId,String mediaId){
-        String corpToken = this.getCorpAccessToken(corpId);
-        String mediaDownloadUrl = String.format(qywxInnerConfig.getMediaGetUrl(),corpToken,mediaId);
+        String accessToken = this.getAccessToken(corpId);
+        String mediaDownloadUrl = String.format(qywxInnerConfig.getMediaGetUrl(),accessToken,mediaId);
         return RestUtils.dowload(mediaDownloadUrl);
 
     }
@@ -237,8 +229,8 @@ public class QywxInnerService {
     }
 
     public Map getApprovalFlowStatus(String corpId,String thirdNo){
-        String corpToken = this.getCorpAccessToken(corpId);
-        String approvalUrl = String.format(qywxInnerConfig.getOpenApprovalDataUrl(),corpToken);
+        String accessToken = this.getAccessToken(corpId);
+        String approvalUrl = String.format(qywxInnerConfig.getOpenApprovalDataUrl(),accessToken);
         JSONObject postJson = new JSONObject();
         postJson.put("thirdNo",thirdNo);
         return RestUtils.post(approvalUrl,postJson);
@@ -247,15 +239,16 @@ public class QywxInnerService {
     //**********************************  PC相关   *************************//
     //PC网页 sso  用于非企业微信环境下扫码登录，如运行在浏览的器应用后台或者脱离企业微信环境下H5应用
     //https://open.work.weixin.qq.com/wwopen/sso/3rd_qrConnect?appid=ww100000a5f2191&redirect_uri=http%3A%2F%2Fwww.oa.com&state=web_login@gyoss9&usertype=admin
-    public  String getSsoUrl(String redirectUrl,String userType){
+    public  String getSsoUrl(String corpId,String redirectUrl){
+        QywxInnerCompany company = qywxInnerCompanyService.getCompanyByCorpId(corpId);
         String state = "test";
-        String ssoUrl = String.format(qywxInnerConfig.getSsoAuthUrl(),qywxInnerConfig.getCorpId(),redirectUrl,state,userType);
+        String ssoUrl = String.format(qywxInnerConfig.getSsoAuthUrl(),company.getCorpId(),company.getAgentId(),redirectUrl,state);
         return ssoUrl;
     }
 
-    public Map getLoginInfo(String authCode){
+    public Map getLoginInfo(String corpId,String authCode){
 
-        String url = String.format(qywxInnerConfig.getLoginInfoUrl(),getProviderToken()) ;
+        String url = String.format(qywxInnerConfig.getSsoUserInfoUrl(),getAccessToken(corpId)) ;
 
         JSONObject postJson = new JSONObject();
         postJson.put("auth_code",authCode);
@@ -270,63 +263,33 @@ public class QywxInnerService {
 
 
     //********************************** H5应用 Oauth   *************************//
-    public String getOauthUrl(String url){
+    public String getOauthUrl(String corpId,String url){
 //        应用授权作用域。
 //        snsapi_base：静默授权，可获取成员的基础信息（UserId与DeviceId）；
 //        snsapi_userinfo：静默授权，可获取成员的详细信息，但不包含手机、邮箱等敏感信息；
 //        snsapi_privateinfo：手动授权，可获取成员的详细信息，包含手机、邮箱等敏感信息（已不再支持获取手机号/邮箱）。
-        String scope = "snsapi_userinfo";
+        QywxInnerCompany company = qywxInnerCompanyService.getCompanyByCorpId(corpId);
         String state = "sdfds343";
-        String result = String.format(qywxInnerConfig.getOauthUrl(),qywxInnerConfig.getSuiteId(),url,scope,state);
+        String result = String.format(qywxInnerConfig.getOauthUrl(),company.getCorpId(),url,state);
         return  result;
     }
 
-    public Map getOauthUser(String code) {
+    public Map getOauthUser(String  corpId,String code) {
 
-        String suiteToken = getSuiteToken();
+        String accessToken = getAccessToken(corpId);
 
-        //获取访问用户身份
 
-//        方法一
-//        使用此url的suiteToken带了-_请求通过 java.lang.IllegalArgumentException: Not enough variable values available to expand 'suite_access_token'
-//        https://blog.csdn.net/xs_challenge/article/details/109451263
-
-//        Map<String,String> paramsMap = new HashMap();
-//        String suiteToken = "9EEq7bDkw3zQlHU6CDfBqbjFCYHYt1O6OmTfKWOEfOvDGLSq-stlraI6rkeGgTFiMhQ8wu24ivyGdTvuuOR1hETOXgSXUoNINqALHF1I4Z3BxfAuagNh_XTGFcRpXnAq";
-//        paramsMap.put("suite_access_token",suiteToken);
-//        paramsMap.put("code",code);
-//        Map response = qywxInnerHttpClient.getForObject(qywxInnerConfig.getOauthUserUrl(),Map.class,paramsMap);
-
-//        方法二
-//        String getOauthUrl = String.format(qywxInnerConfig.getOauthUserUrl(),suiteToken,code);
-//        HttpHeaders httpHeaders = new HttpHeaders();
-//        //httpHeaders.set("Cookie", cookies);
-//        httpHeaders.set("Content-Type", "application/json; charset=utf-8");
-//        URI uri = null;
-//        try {
-//            uri = new URI(getOauthUrl);
-//        } catch (URISyntaxException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//        logger.info(getOauthUrl);
-//        Map  response = qywxInnerHttpClient.exchange(URI.create(getOauthUrl), HttpMethod.GET,new HttpEntity<>(httpHeaders),Map.class).getBody();
-//
-
-        //方法三
-        String getOauthUrl = String.format(qywxInnerConfig.getOauthUserUrl(),suiteToken,code);
+        String getOauthUrl = String.format(qywxInnerConfig.getOauthUserUrl(),accessToken,code);
         Map  response = RestUtils.get(getOauthUrl);
         if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
             logger.error(response.toString());
             return  response;
         }
 
-        String userTicket = (String) response.get("user_ticket");
-        //获取访问用户敏感信息
-        JSONObject postJson = new JSONObject();
-        postJson.put("user_ticket",userTicket);
-        String url = String.format(qywxInnerConfig.getOauthUserDetailUrl(),suiteToken);
-        Map detaiResponse = RestUtils.post(url,postJson);
+        //获取通讯录用户详情get
+        String userId = (String) response.get("UserId");
+        String url = String.format(qywxInnerConfig.getUserDetailUrl(),accessToken,userId);
+        Map detaiResponse = RestUtils.get(url);
         //获取错误日志
         if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
             logger.error(detaiResponse.toString());
@@ -351,13 +314,19 @@ public class QywxInnerService {
 
 
 
+
+
+
+
+
+
     public Map  getJsSignAgent(String corpId,String nonce, String timestamp,  String signUrl) throws  Exception{
         //https://work.weixin.qq.com/api/doc/90001/90144/90548
         //https://work.weixin.qq.com/api/doc/90001/90144/90539#%E8%8E%B7%E5%8F%96%E5%BA%94%E7%94%A8%E7%9A%84jsapi_ticket
 
         //获取jsticket
-        String corpToken = this.getCorpAccessToken(corpId);
-        String url = String.format(qywxInnerConfig.getJsapiTicketAgentUrl(),corpToken);
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getJsapiTicketAgentUrl(),accessToken);
         Map response = RestUtils.get(url);
         //获取错误日志
         if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
@@ -368,7 +337,7 @@ public class QywxInnerService {
         String sign = QywxSHA.getSHA1(jsapiTicket,nonce,timestamp,signUrl);
 
         //获取appid
-        QywxInnerCompany company =  this.getCompanyByCorpId(corpId);
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
         Integer agentId = company.getAgentId();
 
         HashMap result = new HashMap();
@@ -382,123 +351,74 @@ public class QywxInnerService {
     }
 
     //******************************  家校沟通   *********************//
-    public  String getSchoolOauthUrl(String url){
+    public  String getSchoolOauthUrl(String corpId,String url){
 
-//        应用授权作用域。
-//        snsapi_base：静默授权，可获取成员的基础信息（UserId与DeviceId）；
-//        snsapi_userinfo：静默授权，可获取成员的详细信息，但不包含手机、邮箱等敏感信息；
-//        snsapi_privateinfo：手动授权，可获取成员的详细信息，包含手机、邮箱等敏感信息（已不再支持获取手机号/邮箱）。
-        String scope = "snsapi_userinfo";
+
+        QywxInnerCompany company = qywxInnerCompanyService.getCompanyByCorpId(corpId);
         String state = "sdfds343";
-        String result = String.format(qywxInnerConfig.getSchoolOauthUrl(),qywxInnerConfig.getSuiteId(),url,scope,state);
+        String result = String.format(qywxInnerConfig.getOauthUrl(),company.getCorpId(),url,state);
         return  result;
-    }
-
-    public Map getSchoolOauthUser(String code) {
-
-        String suiteToken = getSuiteToken();
-        //获取访问用户身份
-        String getOauthUrl = String.format(qywxInnerConfig.getSchoolOauthUserUrl(),suiteToken,code);
-        Map  response = RestUtils.get(getOauthUrl);
-        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
-            logger.error(response.toString());
-            return  response;
-        }
-
-        Map detaiResponse = new HashMap();
-        //家长
-        if(response.containsKey("external_userid")){
-
-
-            //https://work.weixin.qq.com/api/doc/90001/90143/91711
-
-            String coprId = (String) response.get("CorpId");
-            String corpToken = this.getCorpAccessToken(coprId);
-
-            ArrayList parentsArray = (ArrayList) response.get("parents");
-            if(parentsArray.size()<0){
-                JsonData.buildError("无家长信息");
-            }
-            HashMap parentsMap = (HashMap) parentsArray.get(0);
-            String userId = (String) parentsMap.get("parent_userid");
-            //获取访问用户敏感信息
-            //https://work.weixin.qq.com/api/doc/90001/90143/92038
-            String url = String.format(qywxInnerConfig.getSchoolUserGetUrl(),corpToken,userId);
-            detaiResponse = RestUtils.get(url);
-            //获取错误日志
-            if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
-                logger.error(detaiResponse.toString());
-            }
-
-        }else{
-            //公司成员
-            String userTicket = (String) response.get("user_ticket");
-            //获取访问用户敏感信息
-            JSONObject postJson = new JSONObject();
-            postJson.put("user_ticket",userTicket);
-            String url = String.format(qywxInnerConfig.getOauthUserDetailUrl(),suiteToken);
-            detaiResponse = RestUtils.post(url,postJson);
-            //获取错误日志
-            if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
-                logger.error(detaiResponse.toString());
-            }
-            detaiResponse.put("user_type",0);
-        }
-
-
-
-        /**
-         * 家长
-         {
-         "errcode": 0,
-         "errmsg": "ok",
-         "user_type": 1,
-         "student":{
-         "student_userid": "zhangsan",
-         "name": "张三",
-         "department": [1, 2],
-         "parents":[
-         {
-         "parent_userid": "zhangsan_parent1",
-         "relation": "爸爸",
-         "mobile":"18000000000",
-         "is_subscribe": 1,
-         "external_userid":"xxxxx"
-         },
-         {
-         "parent_userid": "zhangsan_parent2",
-         "relation": "妈妈",
-         "mobile": "18000000001",
-         "is_subscribe": 0
-         }
-         ]
-         },
-         "parent":{
-         "parent_userid": "zhangsan_parent2",
-         "mobile": "18000000003",
-         "is_subscribe": 1,
-         "external_userid":"xxxxx",
-         "children":[
-         {
-         "student_userid": "zhangsan",
-         "relation": "妈妈"
-         },
-         {
-         "student_userid": "lisi",
-         "relation": "伯母"
-         }
-         ]
-         }
-         }
-         */
-
-        return detaiResponse;
 
     }
+
+//    public Map getSchoolOauthUser(String code) {
+//
+//        String accessToken = getaccessToken();
+//        //获取访问用户身份
+//        String getOauthUrl = String.format(qywxInnerConfig.getSchoolOauthUserUrl(),accessToken,code);
+//        Map  response = RestUtils.get(getOauthUrl);
+//        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+//            logger.error(response.toString());
+//            return  response;
+//        }
+//
+//        Map detaiResponse = new HashMap();
+//        //家长
+//        if(response.containsKey("external_userid")){
+//
+//
+//            //https://work.weixin.qq.com/api/doc/90001/90143/91711
+//
+//            String coprId = (String) response.get("CorpId");
+//            String accessToken = this.getAccessToken(coprId);
+//
+//            ArrayList parentsArray = (ArrayList) response.get("parents");
+//            if(parentsArray.size()<0){
+//                JsonData.buildError("无家长信息");
+//            }
+//            HashMap parentsMap = (HashMap) parentsArray.get(0);
+//            String userId = (String) parentsMap.get("parent_userid");
+//            //获取访问用户敏感信息
+//            //https://work.weixin.qq.com/api/doc/90001/90143/92038
+//            String url = String.format(qywxInnerConfig.getSchoolUserGetUrl(),accessToken,userId);
+//            detaiResponse = RestUtils.get(url);
+//            //获取错误日志
+//            if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
+//                logger.error(detaiResponse.toString());
+//            }
+//
+//        }else{
+//            //公司成员
+//            String userTicket = (String) response.get("user_ticket");
+//            //获取访问用户敏感信息
+//            JSONObject postJson = new JSONObject();
+//            postJson.put("user_ticket",userTicket);
+//            String url = String.format(qywxInnerConfig.getOauthUserDetailUrl(),accessToken);
+//            detaiResponse = RestUtils.post(url,postJson);
+//            //获取错误日志
+//            if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
+//                logger.error(detaiResponse.toString());
+//            }
+//            detaiResponse.put("user_type",0);
+//        }
+//
+//        return detaiResponse;
+//
+//    }
 
     public Map getSchoolDepartmentList(String corpId,String deptId){
-        String corpToken = this.getCorpAccessToken(corpId);
-        String url = String.format(qywxInnerConfig.getSchoolDepartmentListUrl(),corpToken,deptId) ;
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getSchoolDepartmentListUrl(),accessToken,deptId) ;
 
         JSONObject response = RestUtils.get(url);
         //获取错误日志
@@ -509,8 +429,8 @@ public class QywxInnerService {
     }
 
     public Map getSchoolUserList(String corpId,String deptId,String fetchChild){
-        String corpToken = this.getCorpAccessToken(corpId);
-        String url = String.format(qywxInnerConfig.getSchoolUserListUrl(),corpToken,deptId,fetchChild) ;
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getSchoolUserListUrl(),accessToken,deptId,fetchChild) ;
 
         JSONObject response = RestUtils.get(url);
         //获取错误日志
@@ -523,11 +443,11 @@ public class QywxInnerService {
 
     public Map extContactMessageSend(String corpId,String studentUserid,String text){
 
-        String corpToken = this.getCorpAccessToken(corpId);
-        String url = String.format(qywxInnerConfig.getExtContactMessageSendUrl(),corpToken) ;
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactMessageSendUrl(),accessToken) ;
 
         //获取企业的agentid
-        QywxInnerCompany company =  this.getCompanyByCorpId(corpId);
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
         Integer agentId = company.getAgentId();
 
         JSONObject postJson = new JSONObject();
@@ -549,13 +469,13 @@ public class QywxInnerService {
     }
 
     //******************************  小程序应用   *********************//
-    public Map getCode2sessionUser(String code){
-        String suiteToken = getSuiteToken();
+    public Map getCode2sessionUser(String corpId,String code){
+        String acessToken = getAccessToken(corpId);
         //获取访问用户身份
 //        Map paramsMap = new HashMap();
-//        paramsMap.put("suite_access_token",suiteToken);
+//        paramsMap.put("suite_access_token",accessToken);
 //        paramsMap.put("code",code);
-        String url = String.format(qywxInnerConfig.getCode2sessionUrl(),suiteToken,code);
+        String url = String.format(qywxInnerConfig.getCode2sessionUrl(),acessToken,code);
         Map response = RestUtils.get(url);
         //获取错误日志
         if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
@@ -563,5 +483,5 @@ public class QywxInnerService {
         }
         return  response;
     }
-    
+
 }

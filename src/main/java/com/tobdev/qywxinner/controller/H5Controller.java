@@ -1,5 +1,6 @@
 package com.tobdev.qywxinner.controller;
 
+import com.tobdev.qywxinner.model.entity.QywxInnerUser;
 import com.tobdev.qywxinner.service.QywxInnerService;
 import com.tobdev.qywxinner.utils.CommonUtils;
 import com.tobdev.qywxinner.utils.CookieUtils;
@@ -34,15 +35,16 @@ public class H5Controller {
 
     @RequestMapping({"/h5/index"})
     String index(HttpServletRequest request, ModelMap model){
+        String corpId = (String) request.getAttribute("corp_id");
         //先判断是否登录
         //没有登录去登录
         String oauthRedirectUrl = CommonUtils.RouteToUrl(request,"/h5/oauth_callback");
-        String oauthUrl = QywxInnerService.getOauthUrl(oauthRedirectUrl);
+        String oauthUrl = qywxInnerService.getOauthUrl(corpId,oauthRedirectUrl);
         model.put("oauth_url",oauthUrl);
 
         //没有登录去登录
-        String schoolOauthRedirectUrl = CommonUtils.RouteToUrl(request,"/school/oauth_callback");
-        String schoolOauthUrl = QywxInnerService.getSchoolOauthUrl(schoolOauthRedirectUrl);
+        String schoolOauthRedirectUrl = CommonUtils.RouteToUrl(request,"/h5/oauth_callback");
+        String schoolOauthUrl = qywxInnerService.getSchoolOauthUrl(corpId,schoolOauthRedirectUrl);
         model.put("school_oauth_url",schoolOauthUrl);
 
         return  "h5/index";
@@ -50,9 +52,9 @@ public class H5Controller {
 
     @RequestMapping("/h5/oauth")
     public void oauth(HttpServletRequest request,HttpServletResponse response) throws IOException {
-
+        String corpId = (String) request.getAttribute("corp_id");
         String oauthRedirectUrl = CommonUtils.RouteToUrl(request,"/h5/oauth_callback");
-        String oauthUrl = QywxInnerService.getOauthUrl(oauthRedirectUrl);
+        String oauthUrl = qywxInnerService.getOauthUrl(corpId,oauthRedirectUrl);
        // return  new ModelAndView(new RedirectView(oauthUrl));
         response.sendRedirect(oauthUrl);
 
@@ -62,17 +64,21 @@ public class H5Controller {
 
     @RequestMapping("/h5/oauth_callback")
     public void oauthCallback(HttpServletRequest request,HttpServletResponse response,@RequestParam("code") String code) throws IOException {
+        String corpId = (String) request.getAttribute("corp_id");
+
         //通过code获取信息
-        Map result = QywxInnerService.getOauthUser(code);
+        Map result = qywxInnerService.getOauthUser(corpId,code);
         //查数据库获取人员
 
         //人员已侦破产生token登录  //本案例仅从企业微信接口获取未从数据表中获取
-        QywxThirdUser user = new QywxThirdUser();
-        user.setCorpId((String) result.get("corpid"));
+        QywxInnerUser user = new QywxInnerUser();
+        user.setCorpId(corpId);
         user.setUserId((String) result.get("userid"));
         user.setUserType(0);
         user.setName((String) result.get("name"));
         user.setAvatar((String) result.get("avatar"));
+        user.setMobile((String) result.get("mobile"));
+        user.setQrCode((String) result.get("qr_code"));
         String token=  JWTUtils.geneJsonWebToken(user);
 
 //        result.put("token",token);
@@ -97,7 +103,9 @@ public class H5Controller {
         System.out.println(corpId);
 
         model.put("user_id",userId);
-        model.put("corp_id",corpId);
+        model.put("user_name",corpId);
+//        model.put("mobile",corpId);
+//        model.put("qr_code",corpId);
 
 
         model.put("access_token",qywxInnerService.getAccessToken(corpId));
@@ -141,7 +149,7 @@ public class H5Controller {
         Map signConig = qywxInnerService.getJsSign(corpId,nonce,timestamp,url);
         model.addAttribute("signConfig",signConig);
 
-        Map signAgentConig = QywxInnerService.getJsSignAgent(corpId,nonce,timestamp,url);
+        Map signAgentConig = qywxInnerService.getJsSignAgent(corpId,nonce,timestamp,url);
         System.out.println(signAgentConig);
         model.addAttribute("signAgentConfig",signAgentConig);
 

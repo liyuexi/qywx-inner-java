@@ -9,7 +9,9 @@ public class QywxInnerUser {
     private String corpId;
     private String userId;
     private String name;
+    private String mobile;
     private String avatar;
+    private String qrCode;
     private Integer status;
     private QywxInnerCompany company;
     private List<QywxInnerDepartment> departmentList;
@@ -86,17 +88,36 @@ public class QywxInnerUser {
         this.userType = userType;
     }
 
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
     @Override
     public String toString() {
-        return "QywxThirdUser{" +
+        return "QywxInnerUser{" +
                 "id=" + id +
                 ", corpId='" + corpId + '\'' +
                 ", userId='" + userId + '\'' +
                 ", name='" + name + '\'' +
+                ", mobile='" + mobile + '\'' +
                 ", avatar='" + avatar + '\'' +
+                ", qrCode='" + qrCode + '\'' +
                 ", status=" + status +
                 ", company=" + company +
                 ", departmentList=" + departmentList +
+                ", userType=" + userType +
                 '}';
     }
 }

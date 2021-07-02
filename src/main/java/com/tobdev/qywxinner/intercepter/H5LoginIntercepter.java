@@ -17,6 +17,7 @@ public class H5LoginIntercepter implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+
         try {
             String accessToken = request.getHeader("token");
             if(accessToken == null){
@@ -33,9 +34,9 @@ public class H5LoginIntercepter implements HandlerInterceptor {
                     return  false;
                 }
                 //获取信息 设置信息
-                String coprId = (String) claims.get("corp_id");
+//                String coprId = (String) claims.get("corp_id");
                 String userId = (String)claims.get("user_id");
-                request.setAttribute("corp_id",coprId);
+//                request.setAttribute("corp_id",coprId);
                 request.setAttribute("user_id",userId);
                 return  true;
             }

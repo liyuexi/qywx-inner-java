@@ -1,10 +1,9 @@
 package com.tobdev.qywxinner.controller;
 
-import com.alibaba.excel.EasyExcel;
-import com.tobdev.qywxinner.model.excel.QywxContact;
+
 import com.tobdev.qywxinner.service.QywxInnerService;
 
-import com.tobdev.qywxinner.service.impl.QywxThirdUserServiceImpl;
+
 import com.tobdev.qywxinner.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,11 +39,6 @@ public class ContactController {
         String userUrl = CommonUtils.RouteToUrl(request,"/contact/user");
         model.put("user_url",userUrl);
 
-        String opendataUrl = CommonUtils.RouteToUrl(request,"/contact/opendata");
-        model.put("opendata_url",opendataUrl);
-
-        String transUrl = CommonUtils.RouteToUrl(request,"/contact/trans");
-        model.put("trans_url",transUrl);
 
 
         return  "contact/index";

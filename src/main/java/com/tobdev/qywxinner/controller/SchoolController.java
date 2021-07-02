@@ -28,10 +28,10 @@ public class SchoolController {
 
     @RequestMapping({"/school/index"})
     String index(HttpServletRequest request, ModelMap model){
-
+        String corpId = (String) request.getAttribute("corp_id");
         //没有登录去登录
         String schoolOauthRedirectUrl = CommonUtils.RouteToUrl(request,"/school/oauth_callback");
-        String schoolOauthUrl = QywxInnerService.getSchoolOauthUrl(schoolOauthRedirectUrl);
+        String schoolOauthUrl = qywxInnerService.getSchoolOauthUrl(corpId,schoolOauthRedirectUrl);
         model.put("school_oauth_url",schoolOauthUrl);
 
         String schoolDepartmentUrl = CommonUtils.RouteToUrl(request,"/school/department_list");
@@ -46,7 +46,7 @@ public class SchoolController {
 
         //当前登录身份
         String userId = (String) request.getAttribute("user_id");
-        String corpId = (String) request.getAttribute("corp_id");
+
 
         model.put("access_token",qywxInnerService.getAccessToken(corpId));
 
@@ -62,25 +62,26 @@ public class SchoolController {
     @ResponseBody
     public void oauthCallback(HttpServletRequest request, HttpServletResponse response, @RequestParam("code") String code) throws IOException {
         //通过code获取信息
-        Map result = QywxInnerService.getSchoolOauthUser(code);
-        System.out.println(result);
-        //查数据库获取人员
-        //人员已侦破产生token登录  //本案例仅从企业微信接口获取未从数据表中获取
-        QywxInnerUser user = new QywxInnerUser();
-        user.setCorpId((String) result.get("corpid"));
-        user.setUserId((String) result.get("userid"));
-        user.setUserType((Integer) result.get("user_Type"));
-        user.setName((String) result.get("name"));
-        user.setAvatar((String) result.get("avatar"));
-        String token=  JWTUtils.geneJsonWebToken(user);
 
-//        result.put("token",token);
-
-        //本案例写入cookie并跳转
-        CookieUtils.setCookie(response,"token",token,24*60*60);
-
-        String priIndexUrl = CommonUtils.RouteToUrl(request,"/school/index");
-        response.sendRedirect(priIndexUrl);
+//        Map result = qywxInnerService.getSchoolOauthUser(code);
+//        System.out.println(result);
+//        //查数据库获取人员
+//        //人员已侦破产生token登录  //本案例仅从企业微信接口获取未从数据表中获取
+//        QywxInnerUser user = new QywxInnerUser();
+//        user.setCorpId((String) result.get("corpid"));
+//        user.setUserId((String) result.get("userid"));
+//        user.setUserType((Integer) result.get("user_Type"));
+//        user.setName((String) result.get("name"));
+//        user.setAvatar((String) result.get("avatar"));
+//        String token=  JWTUtils.geneJsonWebToken(user);
+//
+//
+//
+//        //本案例写入cookie并跳转
+//        CookieUtils.setCookie(response,"token",token,24*60*60);
+//
+//        String priIndexUrl = CommonUtils.RouteToUrl(request,"/school/index");
+//        response.sendRedirect(priIndexUrl);
 
     }
 
@@ -93,7 +94,7 @@ public class SchoolController {
         String corpId = (String) request.getAttribute("corp_id");
 
         String studentUserid = "90789833e153546ab8dbba1ab0d5f066";
-        return  QywxInnerService.extContactMessageSend(corpId,studentUserid,"发送文本测试消息");
+        return  qywxInnerService.extContactMessageSend(corpId,studentUserid,"发送文本测试消息");
     }
 
     @RequestMapping("/school/department_list")
@@ -104,7 +105,7 @@ public class SchoolController {
         String corpId = (String) request.getAttribute("corp_id");
 
 
-        Map result = QywxInnerService.getSchoolDepartmentList(corpId,"");
+        Map result = qywxInnerService.getSchoolDepartmentList(corpId,"");
 
         //查数据库获取人员
 
@@ -122,7 +123,7 @@ public class SchoolController {
         String corpId = (String) request.getAttribute("corp_id");
 
         //写死测试
-        Map result = QywxInnerService.getSchoolUserList(corpId,"1","1");
+        Map result = qywxInnerService.getSchoolUserList(corpId,"1","1");
 
         //查数据库获取人员
 

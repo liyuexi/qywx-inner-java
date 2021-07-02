@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 public class QywxInnerConfig {
 
     private String corpId;
-    private String providerSecret;
 
     private String suiteId;
     private String suiteSecret;
@@ -22,13 +21,14 @@ public class QywxInnerConfig {
 
     //获取access_token
     //https://open.work.weixin.qq.com/api/doc/90000/90135/91039
-    private String corpTokenUrl = baseUrl+"gettoken?corpid=%s&corpsecret=%s";
+    private String accessTokenUrl = baseUrl+"gettoken?corpid=%s&corpsecret=%s";
 
     //身份验证 扫码授权登录
     //https://open.work.weixin.qq.com/api/doc/90000/90135/91019
     private String ssoAuthUrl = "https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=%s&agentid=%s&redirect_uri=%s&state=%s";
     //https://open.work.weixin.qq.com/api/doc/90000/90135/91437
-    private String loginInfoUrl = baseUrl+"user/getuserinfo?access_token=%s&code=%s";
+    //与H5登录接口一样
+    private String ssoUserInfoUrl = baseUrl+"user/getuserinfo?access_token=%s&code=%s";
 
     //公司相关
     //https://open.work.weixin.qq.com/api/doc/90000/90135/90208
@@ -36,7 +36,7 @@ public class QywxInnerConfig {
     //https://open.work.weixin.qq.com/api/doc/90000/90135/90200
     private String userSimplelistUrl = baseUrl+"user/simplelist?access_token=%s&department_id=%s&fetch_child=%s";
     //https://open.work.weixin.qq.com/api/doc/90000/90135/90196
-    private String userDetailUrl = baseUrl+"user/get?access_token={access_token}&userid={user_id}";
+    private String userDetailUrl = baseUrl+"user/get?access_token=%s&userid=%s";
 
     //客户联系
     //获取配置了客户联系功能的成员列表 https://open.work.weixin.qq.com/api/doc/90000/90135/92571
@@ -105,13 +105,6 @@ public class QywxInnerConfig {
     private String code2sessionUrl = baseUrl+"miniprogram/jscode2session?access_token=%s&js_code=%s&grant_type=authorization_code";
 
 
-    public String getProviderSecret() {
-        return providerSecret;
-    }
-
-    public void setProviderSecret(String providerSecret) {
-        this.providerSecret = providerSecret;
-    }
     public String getJsapiTicketUrl() {
         return jsapiTicketUrl;
     }
@@ -124,8 +117,8 @@ public class QywxInnerConfig {
         return userSimplelistUrl;
     }
 
-    public String getCorpTokenUrl() {
-        return corpTokenUrl;
+    public String getAccessTokenUrl() {
+        return accessTokenUrl;
     }
 
     public String getDepartmentUrl() {
@@ -165,9 +158,6 @@ public class QywxInnerConfig {
         return oauthUserUrl;
     }
 
-    public String getOauthUserDetailUrl() {
-        return oauthUserDetailUrl;
-    }
 
     public String getCode2sessionUrl() {
         return code2sessionUrl;
@@ -218,9 +208,6 @@ public class QywxInnerConfig {
         return ssoAuthUrl;
     }
 
-    public String getLoginInfoUrl() {
-        return loginInfoUrl;
-    }
 
     public String getJsapiTicketAgentUrl() {
         return jsapiTicketAgentUrl;
@@ -301,5 +288,9 @@ public class QywxInnerConfig {
 
     public String getExtContactMessageSendUrl() {
         return extContactMessageSendUrl;
+    }
+
+    public String getSsoUserInfoUrl() {
+        return ssoUserInfoUrl;
     }
 }

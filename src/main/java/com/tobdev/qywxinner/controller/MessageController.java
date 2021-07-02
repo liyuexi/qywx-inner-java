@@ -35,7 +35,7 @@ public class MessageController {
 
         String corpId = (String) request.getAttribute("corp_id");
         String userId = (String) request.getAttribute("user_id");
-        return  QywxInnerService.sendMessageText(corpId,userId,text);
+        return  qywxInnerService.sendMessageText(corpId,userId,text);
 
     }
 

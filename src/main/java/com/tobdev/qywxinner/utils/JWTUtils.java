@@ -1,6 +1,6 @@
 package com.tobdev.qywxinner.utils;
 
-import com.tobdev.qywxthird.model.entity.QywxThirdUser;
+import com.tobdev.qywxinner.model.entity.QywxInnerUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -12,14 +12,18 @@ public class JWTUtils {
     private static  final long EXPIRE = 60000*60*24*7;
     private static final String SECRET = "tobdev.com";
 
+
     private  static final String TOKEN_PREFIX = "tobdev";
 
     private static final String SUBJECT = "tobdev";
 
-    public static String geneJsonWebToken(QywxThirdUser user){
+    public static String geneJsonWebToken(QywxInnerUser user){
         String token = Jwts.builder().setSubject(SUBJECT)
                 .claim("corp_id",user.getCorpId())
                 .claim("user_id",user.getUserId())
+                .claim("user_name",user.getName())
+                .claim("mobile",user.getMobile())
+                .claim("qr_code",user.getQrCode())
                 .claim("user_type",user.getUserType())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))

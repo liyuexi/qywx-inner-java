@@ -31,7 +31,7 @@ public class MediaController {
     void download(HttpServletRequest request, HttpServletResponse response, @RequestParam(name = "media_id") String mediaId) throws IOException {
 
         String corpId = (String) request.getAttribute("corp_id");
-        byte[]  filebytes =  QywxInnerService.downloadMedia(corpId,mediaId);
+        byte[]  filebytes =  qywxInnerService.downloadMedia(corpId,mediaId);
 
         OutputStream out = response.getOutputStream();
         out.write(filebytes);

@@ -5,12 +5,14 @@ public class QywxInnerCompany {
 
     private Integer id;
     private String corpId;
-    private String permanentCode;
+    private Integer agentId;
+    private String agentSecret;
+
     private String corpName;
     private String corpFullName;
     private Integer subjectType;
     private String verifiedEndTime;
-    private Integer agentId;
+
     private Integer status;
 
 
@@ -62,13 +64,6 @@ public class QywxInnerCompany {
         this.corpId = corpId;
     }
 
-    public String getPermanentCode() {
-        return permanentCode;
-    }
-
-    public void setPermanentCode(String permanentCode) {
-        this.permanentCode = permanentCode;
-    }
 
     public Integer getStatus() {
         return status;
@@ -86,17 +81,7 @@ public class QywxInnerCompany {
         this.agentId = agentId;
     }
 
-    @Override
-    public String toString() {
-        return "QywxThirdCompany{" +
-                "id=" + id +
-                ", corpId='" + corpId + '\'' +
-                ", permanentCode='" + permanentCode + '\'' +
-                ", corpName='" + corpName + '\'' +
-                ", corpFullName='" + corpFullName + '\'' +
-                ", subjectType='" + subjectType + '\'' +
-                ", verifiedEndTime='" + verifiedEndTime + '\'' +
-                ", status=" + status +
-                '}';
+    public String getAgentSecret() {
+        return agentSecret;
     }
 }

@@ -2,7 +2,6 @@ package com.tobdev.qywxinner.controller;
 
 import com.tobdev.qywxinner.service.QywxInnerService;
 
-import com.tobdev.qywxinner.service.impl.QywxThirdUserServiceImpl;
 import com.tobdev.qywxinner.utils.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -48,7 +47,7 @@ public class ExtContactController {
 
         String corpId = (String) request.getAttribute("corp_id");
         String userId = (String) request.getAttribute("user_id");
-        return  QywxInnerService.getExtContactFollowUserList(corpId);
+        return  qywxInnerService.getExtContactFollowUserList(corpId);
 
     }
 
@@ -58,7 +57,7 @@ public class ExtContactController {
 
         String corpId = (String) request.getAttribute("corp_id");
         String userId = (String) request.getAttribute("user_id");
-        return  QywxInnerService.getExtContactList(corpId,userId);
+        return  qywxInnerService.getExtContactList(corpId,userId);
 
     }
 
@@ -68,7 +67,7 @@ public class ExtContactController {
 
         String corpId = (String) request.getAttribute("corp_id");
         String userId = (String) request.getAttribute("user_id");
-        return  QywxInnerService.getExtContactGroupchatList(corpId,userId);
+        return  qywxInnerService.getExtContactGroupchatList(corpId,userId);
 
     }
 
