@@ -5,90 +5,76 @@ import com.tobdev.qywxinner.service.QywxInnerService;
 import com.tobdev.qywxinner.utils.CommonUtils;
 import com.tobdev.qywxinner.utils.CookieUtils;
 import com.tobdev.qywxinner.utils.JWTUtils;
+import com.tobdev.qywxinner.utils.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * H5应用专用
  */
-@Controller
+@RestController
 public class H5Controller {
 
     @Autowired
     private QywxInnerService qywxInnerService;
 
 
-    @RequestMapping("/h5")
-    void qywx(HttpServletResponse response) throws IOException {
-        //先判断是否登录
-        response.sendRedirect("https://tobdev.ant-xy.com");
-    }
 
-    @RequestMapping({"/h5/index"})
-    String index(HttpServletRequest request, ModelMap model){
-        String corpId = (String) request.getAttribute("corp_id");
-        //先判断是否登录
-        //没有登录去登录
-        String oauthRedirectUrl = CommonUtils.RouteToUrl(request,"/h5/oauth_callback");
+    @RequestMapping({"/h5/oauthUrl"})
+    JsonData oauthUrl(HttpServletRequest request,@RequestParam("corp_id") String corpId,@RequestParam("oauth_callback") String oauthCallback) throws UnsupportedEncodingException {
+        Map resData = new HashMap();
+
+        //普通应用
+        String oauthRedirectUrl =  URLEncoder.encode(oauthCallback,"utf-8");
         String oauthUrl = qywxInnerService.getOauthUrl(corpId,oauthRedirectUrl);
-        model.put("oauth_url",oauthUrl);
+        resData.put("oauth_url",oauthUrl);
 
-        //没有登录去登录
-        String schoolOauthRedirectUrl = CommonUtils.RouteToUrl(request,"/h5/oauth_callback");
-        String schoolOauthUrl = qywxInnerService.getSchoolOauthUrl(corpId,schoolOauthRedirectUrl);
-        model.put("school_oauth_url",schoolOauthUrl);
+        //家长应用
+//        String schoolOauthRedirectUrl = CommonUtils.RouteToUrl(request,"/h5/oauth_callback");
+//        String schoolOauthUrl = qywxInnerService.getSchoolOauthUrl(corpId,schoolOauthRedirectUrl);
+//        resData.put("school_oauth_url",schoolOauthUrl);
 
-        return  "h5/index";
-    }
-
-    @RequestMapping("/h5/oauth")
-    public void oauth(HttpServletRequest request,HttpServletResponse response) throws IOException {
-        String corpId = (String) request.getAttribute("corp_id");
-        String oauthRedirectUrl = CommonUtils.RouteToUrl(request,"/h5/oauth_callback");
-        String oauthUrl = qywxInnerService.getOauthUrl(corpId,oauthRedirectUrl);
-       // return  new ModelAndView(new RedirectView(oauthUrl));
-        response.sendRedirect(oauthUrl);
-
+        return  JsonData.buildSuccess(resData);
     }
 
 
-
-    @RequestMapping("/h5/oauth_callback")
-    public void oauthCallback(HttpServletRequest request,HttpServletResponse response,@RequestParam("code") String code) throws IOException {
-        String corpId = (String) request.getAttribute("corp_id");
+    @RequestMapping("/h5/oauthUser")
+    JsonData  oauthCallback(HttpServletRequest request,HttpServletResponse response,@RequestParam("corp_id") String corpId,@RequestParam("code") String code) throws IOException {
 
         //通过code获取信息
         Map result = qywxInnerService.getOauthUser(corpId,code);
         //查数据库获取人员
 
+
         //人员已侦破产生token登录  //本案例仅从企业微信接口获取未从数据表中获取
         QywxInnerUser user = new QywxInnerUser();
         user.setCorpId(corpId);
-        user.setUserId((String) result.get("userid"));
-        user.setUserType(0);
-        user.setName((String) result.get("name"));
-        user.setAvatar((String) result.get("avatar"));
-        user.setMobile((String) result.get("mobile"));
-        user.setQrCode((String) result.get("qr_code"));
+        user.setUserId((String) result.get("userId"));
+//        user.setUserId((String) result.get("userid"));
+//        user.setUserType(0);
+//        user.setName((String) result.get("name"));
+//        user.setAvatar((String) result.get("avatar"));
+//        user.setMobile((String) result.get("mobile"));
+//        user.setQrCode((String) result.get("qr_code"));
         String token=  JWTUtils.geneJsonWebToken(user);
 
-//        result.put("token",token);
+        result.put("token",token);
 
-        //本案例写入cookie并跳转
-        CookieUtils.setCookie(response,"token",token,24*60*60);
-
-        String priIndexUrl = CommonUtils.RouteToUrl(request,"/h5/pri/index");
-        response.sendRedirect(priIndexUrl);
-
+        return  JsonData.buildSuccess(result);
     }
 
 
@@ -160,7 +146,6 @@ public class H5Controller {
         return "h5/pri/jssdk";
 
     }
-
 
     @RequestMapping("/h5/pri/jsSign")
     @ResponseBody()

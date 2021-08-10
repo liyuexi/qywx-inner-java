@@ -285,15 +285,17 @@ public class QywxInnerService {
             logger.error(response.toString());
             return  response;
         }
+        return  response;
 
-        //获取通讯录用户详情get
-        String userId = (String) response.get("UserId");
-        String url = String.format(qywxInnerConfig.getUserDetailUrl(),accessToken,userId);
-        Map detaiResponse = RestUtils.get(url);
-        //获取错误日志
-        if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
-            logger.error(detaiResponse.toString());
-        }
+
+//        //获取通讯录用户详情get
+//        String userId = (String) response.get("UserId");
+//        String url = String.format(qywxInnerConfig.getUserDetailUrl(),accessToken,userId);
+//        Map detaiResponse = RestUtils.get(url);
+//        //获取错误日志
+//        if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
+//            logger.error(detaiResponse.toString());
+//        }
         /**
          * {
          * 	"errcode": 0,
@@ -308,7 +310,7 @@ public class QywxInnerService {
          * }
          */
 
-        return detaiResponse;
+//        return detaiResponse;
 
     }
 

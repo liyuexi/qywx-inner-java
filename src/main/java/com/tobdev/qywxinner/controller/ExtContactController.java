@@ -22,8 +22,6 @@ public class ExtContactController {
     private QywxInnerService qywxInnerService;
 
 
-
-
     @RequestMapping("/extcontact/index")
     public String index(HttpServletRequest request,ModelMap model) throws Exception{
 
