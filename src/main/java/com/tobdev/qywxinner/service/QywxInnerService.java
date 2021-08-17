@@ -76,10 +76,6 @@ public class QywxInnerService {
     public Map getUserSimplelist(String corpId,String id,String fetch_child){
 
         String accessToken = getAccessToken(corpId);
-//        Map paramsMap = new HashMap();
-//        paramsMap.put("access_token",accessToken);
-//        paramsMap.put("department_id",id);
-//        paramsMap.put("fetch_child",fetch_child);
         String url =String.format(qywxInnerConfig.getUserSimplelistUrl(),accessToken,id,fetch_child);
         Map response = RestUtils.get(url);
         //获取错误日志
@@ -89,32 +85,35 @@ public class QywxInnerService {
         return response;
     }
 
-    public HashMap getJsSign(String corpId,String nonce, String timestamp,  String signUrl) throws  Exception{
+    public Map getUserDetailList(String corpId,String id,String fetch_child){
 
-
-        //获取jsticket
         String accessToken = getAccessToken(corpId);
-
-//        Map paramsMap = new HashMap();
-//        paramsMap.put("access_token",accessToken);
-        String url = String.format(qywxInnerConfig.getJsapiTicketUrl(),accessToken);
+        String url =String.format(qywxInnerConfig.getUserDetailListUrl(),accessToken,id,fetch_child);
         Map response = RestUtils.get(url);
         //获取错误日志
-        logger.error(response.toString());
         if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
             logger.error(response.toString());
         }
-        String jsapiTicket = (String) response.get("ticket");
-        System.out.println(jsapiTicket);
-        String sign = QywxSHA.getSHA1(jsapiTicket,nonce,timestamp,signUrl);
-        HashMap result = new HashMap();
-        result.put("appId", corpId);
-        result.put("timestamp", timestamp);
-        result.put("nonceStr", nonce);
-        result.put("signature", sign);
-        return  result;
+        return response;
+    }
+
+
+    public Map getUserDetail(String corpId,String userId){
+
+        String accessToken = getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getUserDetailUrl(),accessToken,userId);
+        Map response = RestUtils.get(url);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return response;
 
     }
+
+
+
+
 
     //**********************************  客户联系相关   *************************//
     //获取配置了客户联系功能的成员列表
@@ -285,17 +284,17 @@ public class QywxInnerService {
             logger.error(response.toString());
             return  response;
         }
-        return  response;
+//        return  response;
 
 
-//        //获取通讯录用户详情get
-//        String userId = (String) response.get("UserId");
-//        String url = String.format(qywxInnerConfig.getUserDetailUrl(),accessToken,userId);
-//        Map detaiResponse = RestUtils.get(url);
-//        //获取错误日志
-//        if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
-//            logger.error(detaiResponse.toString());
-//        }
+        //获取通讯录用户详情get
+        String userId = (String) response.get("UserId");
+        String url = String.format(qywxInnerConfig.getUserDetailUrl(),accessToken,userId);
+        Map detaiResponse = RestUtils.get(url);
+        //获取错误日志
+        if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
+            logger.error(detaiResponse.toString());
+        }
         /**
          * {
          * 	"errcode": 0,
@@ -310,17 +309,37 @@ public class QywxInnerService {
          * }
          */
 
-//        return detaiResponse;
+        return detaiResponse;
 
     }
 
 
+    public HashMap getJsSign(String corpId,String nonce, String timestamp,  String signUrl) throws  Exception{
 
 
+        //获取jsticket
+        String accessToken = getAccessToken(corpId);
 
+//        Map paramsMap = new HashMap();
+//        paramsMap.put("access_token",accessToken);
+        String url = String.format(qywxInnerConfig.getJsapiTicketUrl(),accessToken);
+        Map response = RestUtils.get(url);
+        //获取错误日志
+        logger.error(response.toString());
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        String jsapiTicket = (String) response.get("ticket");
+        System.out.println(jsapiTicket);
+        String sign = QywxSHA.getSHA1(jsapiTicket,nonce,timestamp,signUrl);
+        HashMap result = new HashMap();
+        result.put("appId", corpId);
+        result.put("timestamp", timestamp);
+        result.put("nonceStr", nonce);
+        result.put("signature", sign);
+        return  result;
 
-
-
+    }
 
     public Map  getJsSignAgent(String corpId,String nonce, String timestamp,  String signUrl) throws  Exception{
         //https://work.weixin.qq.com/api/doc/90001/90144/90548

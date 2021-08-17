@@ -35,6 +35,8 @@ public class QywxInnerConfig {
     private String departmentUrl = baseUrl+"department/list?access_token=%s";
     //https://open.work.weixin.qq.com/api/doc/90000/90135/90200
     private String userSimplelistUrl = baseUrl+"user/simplelist?access_token=%s&department_id=%s&fetch_child=%s";
+    //https://open.work.weixin.qq.com/api/doc/90000/90135/90201
+    private String userDetailListUrl = baseUrl+"user/list?access_token=%s&department_id=%s&fetch_child=%s";
     //https://open.work.weixin.qq.com/api/doc/90000/90135/90196
     private String userDetailUrl = baseUrl+"user/get?access_token=%s&userid=%s";
 
@@ -125,6 +127,9 @@ public class QywxInnerConfig {
         return departmentUrl;
     }
 
+    public String getUserDetailListUrl() {
+        return userDetailListUrl;
+    }
 
     public String getCorpId() {
         return corpId;

@@ -4,64 +4,51 @@ package com.tobdev.qywxinner.controller;
 import com.tobdev.qywxinner.service.QywxInnerService;
 
 
-import com.tobdev.qywxinner.utils.CommonUtils;
+import com.tobdev.qywxinner.utils.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
  * 通讯录相关，H5及小程序应用公用
  */
-@Controller
+@RestController
 public class ContactController {
 
     @Autowired
     private QywxInnerService qywxInnerService;
 
 
-    @RequestMapping("/contact/index")
-    String index(HttpServletRequest request,ModelMap model){
-
-        String corpId = (String) request.getAttribute("corp_id");
-        model.put("corp_access_token",qywxInnerService.getAccessToken(corpId));
-
-        String jssdkUrl = CommonUtils.RouteToUrl(request,"/contact/department");
-        model.put("dept_url",jssdkUrl);
-
-        String userUrl = CommonUtils.RouteToUrl(request,"/contact/user");
-        model.put("user_url",userUrl);
-
-
-
-        return  "contact/index";
-
+    @RequestMapping("/contact/useDetail")
+    public JsonData useDetail(HttpServletRequest request,@RequestParam("corp_id") String corpId,@RequestParam(value = "user_id") String UserId){
+        Map resData =    qywxInnerService.getUserDetail(corpId,UserId);
+        return  JsonData.buildSuccess(resData);
     }
 
-    @RequestMapping("/contact/department")
-    @ResponseBody
+    @RequestMapping("/contact/departmentList")
     //@RequestParam(value = "id",defaultValue = "0") String id
-    Map department(HttpServletRequest request){
-        String corpId = (String) request.getAttribute("corp_id");
-        return  qywxInnerService.getDepartmentList(corpId);
+    public JsonData department(HttpServletRequest request,@RequestParam("corp_id") String corpId){
+        Map resData =   qywxInnerService.getDepartmentList(corpId);
+        return  JsonData.buildSuccess(resData);
     }
 
-    @RequestMapping("/contact/user")
+    @RequestMapping("/contact/deptUserList")
     @ResponseBody
-    Map user(HttpServletRequest request,@RequestParam(value = "department_id") String departmentId){
-        String corpId = (String) request.getAttribute("corp_id");
-        return  qywxInnerService.getUserSimplelist(corpId,departmentId,"0");
+    public JsonData detpUserList(HttpServletRequest request,@RequestParam("corp_id") String corpId,@RequestParam(value = "department_id") String departmentId){
+        Map resData =    qywxInnerService.getUserSimplelist(corpId,departmentId,"0");
+        return  JsonData.buildSuccess(resData);
     }
 
-
-
-
+    @RequestMapping("/contact/deptUserDetailList")
+    @ResponseBody
+    public JsonData detpUseDetailrList(HttpServletRequest request,@RequestParam("corp_id") String corpId,@RequestParam(value = "department_id") String departmentId){
+        Map resData =    qywxInnerService.getUserDetailList(corpId,departmentId,"0");
+        return  JsonData.buildSuccess(resData);
+    }
 
 }

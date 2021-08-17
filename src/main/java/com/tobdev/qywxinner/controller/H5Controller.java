@@ -78,87 +78,31 @@ public class H5Controller {
     }
 
 
-    @RequestMapping("/h5/pri/index")
-    String home(HttpServletRequest request,ModelMap  model) throws Exception {
-
-        //当前登录身份
-        String userId = (String) request.getAttribute("user_id");
-        String corpId = (String) request.getAttribute("corp_id");
-
-        System.out.println(userId);
-        System.out.println(corpId);
-
-        model.put("user_id",userId);
-        model.put("user_name",corpId);
-//        model.put("mobile",corpId);
-//        model.put("qr_code",corpId);
-
-
-        model.put("access_token",qywxInnerService.getAccessToken(corpId));
-
-
-        String jssdkUrl = CommonUtils.RouteToUrl(request,"/h5/pri/jssdk");
-        model.put("jssdk_url",jssdkUrl);
-
-        String contactUrl = CommonUtils.RouteToUrl(request,"/contact/index");
-        model.put("contact_url",contactUrl);
-
-        String extcontactUrl = CommonUtils.RouteToUrl(request,"/extcontact/index");
-        model.put("extcontact_url",extcontactUrl);
-
-        String messageUrl = CommonUtils.RouteToUrl(request,"/message/index");
-        model.put("message_url",messageUrl);
-
-        String mediaUrl = CommonUtils.RouteToUrl(request,"/media/index");
-        model.put("media_url",mediaUrl);
-
-        String oaUrl = CommonUtils.RouteToUrl(request,"/oa/index");
-        model.put("oa_url",oaUrl);
-
-        return "h5/pri/index";
-
-    }
-
-    @RequestMapping("/h5/pri/jssdk")
-    String test(HttpServletRequest request,ModelMap  model) throws Exception {
-
-
-        String userId = (String) request.getAttribute("user_id");
-        model.addAttribute("userId",userId);
+    @RequestMapping("/h5/pri/jsAgentSign")
+    JsonData getJsAgentSign(HttpServletRequest request,@RequestParam("corp_id") String corpId,@RequestParam("url") String url) throws Exception {
 
         String  timestamp=""+System.currentTimeMillis();
         //随机字符串
         String nonce = "56565";
-        String url = CommonUtils.RouteToUrl(request,"/h5/pri/jssdk");
-        String corpId = (String ) request.getAttribute("corp_id");
 
-        Map signConig = qywxInnerService.getJsSign(corpId,nonce,timestamp,url);
-        model.addAttribute("signConfig",signConig);
-
-        Map signAgentConig = qywxInnerService.getJsSignAgent(corpId,nonce,timestamp,url);
-        System.out.println(signAgentConig);
-        model.addAttribute("signAgentConfig",signAgentConig);
+        Map resData = qywxInnerService.getJsSignAgent(corpId,nonce,timestamp,url);
 
 
-//        model.addAttribute("xx","sdffdf");
-//        model.addObject("sign",result);
-//        model.setViewName("front/test");
-        return "h5/pri/jssdk";
+        return  JsonData.buildSuccess(resData);
 
     }
 
     @RequestMapping("/h5/pri/jsSign")
     @ResponseBody()
-    public Map getJsSign(HttpServletRequest request,@RequestParam("url") String url) throws Exception{
+    public JsonData getJsSign(HttpServletRequest request,@RequestParam("corp_id") String corpId,@RequestParam("url") String url) throws Exception{
         //获取当前时间戳
         String  timestamp=""+System.currentTimeMillis();
         //随机字符串
         String nonce = "sdfsdf";
-        String corp_id = (String) request.getAttribute("corp_id");
 
-        Map result = qywxInnerService.getJsSign(corp_id,nonce,timestamp,url);
+        Map resData = qywxInnerService.getJsSign(corpId,nonce,timestamp,url);
 
-        return  result;
+        return  JsonData.buildSuccess(resData);
     }
 
 
