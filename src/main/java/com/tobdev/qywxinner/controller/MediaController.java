@@ -19,13 +19,7 @@ public class MediaController {
     @Autowired
     private QywxInnerService qywxInnerService;
 
-    @RequestMapping("/media/index")
-    public String index(HttpServletRequest request, ModelMap model) throws Exception{
 
-        String sendTextUrl = CommonUtils.RouteToUrl(request,"/media/download");
-        model.put("mdedia_download_url",sendTextUrl);
-        return  "media/index";
-    }
 
     @RequestMapping({"/media/download"})
     void download(HttpServletRequest request, HttpServletResponse response, @RequestParam(name = "media_id") String mediaId) throws IOException {
