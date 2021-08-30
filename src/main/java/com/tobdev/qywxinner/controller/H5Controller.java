@@ -93,7 +93,6 @@ public class H5Controller {
     }
 
     @RequestMapping("/h5/jsSign")
-    @ResponseBody()
     public JsonData getJsSign(HttpServletRequest request,@RequestParam("corp_id") String corpId,@RequestParam("url") String url) throws Exception{
         //获取当前时间戳
         String  timestamp=""+System.currentTimeMillis();

@@ -28,8 +28,8 @@ public class InterceptorConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(commonInterCepter()).addPathPatterns("/**");
         //"/contact/*",
-        registry.addInterceptor(h5LoginIntercepter()).addPathPatterns("/*/pri/*","/extcontact/*","/message/*","/media/*","/oa/*","/school/*")
-        .excludePathPatterns("/h5","/h5/index","/front/oauth","/school/oauth_callback","/contact/*");
+//        registry.addInterceptor(h5LoginIntercepter()).addPathPatterns("/*/pri/*","/extcontact/*","/message/*","/media/*","/oa/*","/school/*")
+//        .excludePathPatterns("/h5","/message/sendtext","/h5/index","/front/oauth","/school/oauth_callback","/contact/*");
 
         WebMvcConfigurer.super.addInterceptors(registry);
     }
