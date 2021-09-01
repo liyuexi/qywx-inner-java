@@ -247,16 +247,39 @@ public class QywxInnerService {
 
     public Map getLoginInfo(String corpId,String authCode){
 
-        String url = String.format(qywxInnerConfig.getSsoUserInfoUrl(),getAccessToken(corpId)) ;
-
-        JSONObject postJson = new JSONObject();
-        postJson.put("auth_code",authCode);
-        JSONObject response = RestUtils.post(url,postJson);
+        String url = String.format(qywxInnerConfig.getSsoUserInfoUrl(),getAccessToken(corpId),authCode) ;
+        JSONObject response = RestUtils.get(url);
         //获取错误日志
         if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
             logger.error(response.toString());
         }
-        return  response;
+
+        //获取通讯录用户详情get
+        String accessToken = getAccessToken(corpId);
+        String userId = (String) response.get("UserId");
+        String detailUrl = String.format(qywxInnerConfig.getUserDetailUrl(),accessToken,userId);
+        Map detaiResponse = RestUtils.get(detailUrl);
+        //获取错误日志
+        if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
+            logger.error(detaiResponse.toString());
+        }
+        /**
+         * {
+         * 	"errcode": 0,
+         * 	"errmsg": "ok",
+         * 	"corpid": "wwcc3b4b831051d56e",
+         * 	"userid": "LiYueXi",
+         * 	"name": "LiYueXi",
+         * 	"department": [1],
+         * 	"gender": "1",
+         * 	"avatar": "https://rescdn.qqmail.com/node/wwmng/wwmng/style/images/independent/DefaultAvatar$73ba92b5.png",
+         * 	"open_userid": "woMAh2BwAApVMP0ZDYUk42tUw3CIeHFA"
+         * }
+         */
+
+        return detaiResponse;
+
+      //  return  response;
 
     }
 
