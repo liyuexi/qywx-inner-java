@@ -11,10 +11,14 @@ import com.tobdev.qywxinner.utils.SnowFlakeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +59,48 @@ public class QywxInnerService {
 
     }
 
+    //**********************************  应用管理相关   *************************//
+    //获取应用
+    public Map getAgent(String corpId){
+
+        String accessToken = getAccessToken(corpId);
+        //获取企业的agentid
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
+        Integer agentId = company.getAgentId();
+        String url = String.format(qywxInnerConfig.getAgentGetUrl(),accessToken,agentId);
+        Map response = RestUtils.get(url);
+        //获取错误日志
+        logger.error(response.toString());
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return response;
+
+    }
+
+
+    //设置应用
+    public Map setAgent(String corpId, JSONObject postJson){
+
+        //https://open.work.weixin.qq.com/api/doc/90001/90143/93414
+        String accessToken = this.getAccessToken(corpId);
+
+        String url = String.format(qywxInnerConfig.getAgentSetUrl(),accessToken) ;
+        //获取企业的agentid
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
+        Integer agentId = company.getAgentId();
+
+        postJson.put("agentid",agentId);
+        JSONObject response = RestUtils.post(url,postJson);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
+
+    }
+
+    //**********************************  通讯录相关   *************************//
 
     public Map getDepartmentList(String corpId){
 
@@ -196,6 +242,35 @@ public class QywxInnerService {
 
     }
 
+    //发送消息
+    public Map sendImage(String corpId,String userId,String mediaId){
+
+        //https://open.work.weixin.qq.com/api/doc/90001/90143/93414
+        String accessToken = this.getAccessToken(corpId);
+
+        String url = String.format(qywxInnerConfig.getMessageSendUrl(),accessToken) ;
+        //获取企业的agentid
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
+        Integer agentId = company.getAgentId();
+
+        JSONObject postJson = new JSONObject();
+        postJson.put("msgtype","image");
+        postJson.put("agentid",agentId);
+
+        JSONObject testJson =  new JSONObject();
+        testJson.put("media_id",mediaId);
+        postJson.put("image",testJson);
+
+        postJson.put("touser",userId);
+        JSONObject response = RestUtils.post(url,postJson);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
+
+    }
+
     public  String replyMessage(){
 
 //        XStream xstream = new XStream();
@@ -210,6 +285,28 @@ public class QywxInnerService {
 
 
     //**********************************  素材管理相关   *************************//
+
+    public JSONObject uploadMedia(String corpId, MultiValueMap<String, Object> params ,String type){
+        String accessToken = this.getAccessToken(corpId);
+        //https://open.work.weixin.qq.com/api/doc/90000/90135/90253
+        //type	是	媒体文件类型，分别有图片（image）、语音（voice）、视频（video），普通文件（file）
+        //使用multipart/form-data POST上传文件， 文件标识名为”media”
+        String url = String.format(qywxInnerConfig.getMediaUploadUrl(),accessToken,type);
+        return  RestUtils.upload(url,params);
+
+    }
+
+    public JSONObject uploadImg(String corpId, MultiValueMap<String, Object> params ){
+        String accessToken = this.getAccessToken(corpId);
+        //https://open.work.weixin.qq.com/api/doc/90000/90135/90253
+        //type	是	媒体文件类型，分别有图片（image）、语音（voice）、视频（video），普通文件（file）
+        //使用multipart/form-data POST上传文件， 文件标识名为”media”
+        String url = String.format(qywxInnerConfig.getMediaUploadimgUrl(),accessToken);
+        return  RestUtils.upload(url,params);
+
+    }
+
+
     public  byte[] downloadMedia(String corpId,String mediaId){
         String accessToken = this.getAccessToken(corpId);
         String mediaDownloadUrl = String.format(qywxInnerConfig.getMediaGetUrl(),accessToken,mediaId);

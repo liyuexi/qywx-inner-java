@@ -23,6 +23,14 @@ public class QywxInnerConfig {
     //https://open.work.weixin.qq.com/api/doc/90000/90135/91039
     private String accessTokenUrl = baseUrl+"gettoken?corpid=%s&corpsecret=%s";
 
+    //应用管理
+    //https://open.work.weixin.qq.com/api/doc/90000/90135/90227
+    private String agentGetUrl = baseUrl+"agent/get?access_token=%s&agentid=%s";
+    private String agentSetUrl  = baseUrl + "agent/set?access_token=%s";
+    private String AgentMenuCreateUrl  = baseUrl + "menu/create?access_token=%s&agentid=%s";
+    private String AgentMenuGetUrl  = baseUrl + "menu/get?access_token=%s&agentid=%s";
+    private String AgentMenuDeleteUrl  = baseUrl + "/menu/delete?access_token=%s&agentid=%s";
+
     //身份验证 扫码授权登录
     //https://open.work.weixin.qq.com/api/doc/90000/90135/91019
     private String ssoAuthUrl = "https://open.work.weixin.qq.com/wwopen/sso/qrConnect?appid=%s&agentid=%s&redirect_uri=%s&state=%s";
@@ -297,5 +305,25 @@ public class QywxInnerConfig {
 
     public String getSsoUserInfoUrl() {
         return ssoUserInfoUrl;
+    }
+
+    public String getAgentGetUrl() {
+        return agentGetUrl;
+    }
+
+    public String getAgentSetUrl() {
+        return agentSetUrl;
+    }
+
+    public String getAgentMenuCreateUrl() {
+        return AgentMenuCreateUrl;
+    }
+
+    public String getAgentMenuGetUrl() {
+        return AgentMenuGetUrl;
+    }
+
+    public String getAgentMenuDeleteUrl() {
+        return AgentMenuDeleteUrl;
     }
 }

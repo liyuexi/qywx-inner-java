@@ -39,6 +39,17 @@ public class MessageController {
 
     }
 
+    @PostMapping("/message/sendImage")
+    @ResponseBody()
+    public JsonData sendImage(HttpServletRequest request, @RequestBody Map map ) throws Exception{
+
+        String corpId = (String) map.get("corp_id");
+        String toUserId =  (String)map.get("to_user_id");
+        String MediaId =  (String)map.get("media_id");
+        Map resData = qywxInnerService.sendImage(corpId,toUserId,MediaId);
+        return  JsonData.buildSuccess(resData);
+
+    }
 
 
     @GetMapping("/message/callback")
