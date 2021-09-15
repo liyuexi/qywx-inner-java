@@ -502,60 +502,60 @@ public class QywxInnerService {
 
     }
 
-//    public Map getSchoolOauthUser(String code) {
-//
-//        String accessToken = getaccessToken();
-//        //获取访问用户身份
-//        String getOauthUrl = String.format(qywxInnerConfig.getSchoolOauthUserUrl(),accessToken,code);
-//        Map  response = RestUtils.get(getOauthUrl);
-//        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
-//            logger.error(response.toString());
-//            return  response;
-//        }
-//
-//        Map detaiResponse = new HashMap();
-//        //家长
-//        if(response.containsKey("external_userid")){
-//
-//
-//            //https://work.weixin.qq.com/api/doc/90001/90143/91711
-//
-//            String coprId = (String) response.get("CorpId");
-//            String accessToken = this.getAccessToken(coprId);
-//
-//            ArrayList parentsArray = (ArrayList) response.get("parents");
-//            if(parentsArray.size()<0){
-//                JsonData.buildError("无家长信息");
-//            }
-//            HashMap parentsMap = (HashMap) parentsArray.get(0);
-//            String userId = (String) parentsMap.get("parent_userid");
-//            //获取访问用户敏感信息
-//            //https://work.weixin.qq.com/api/doc/90001/90143/92038
-//            String url = String.format(qywxInnerConfig.getSchoolUserGetUrl(),accessToken,userId);
-//            detaiResponse = RestUtils.get(url);
-//            //获取错误日志
-//            if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
-//                logger.error(detaiResponse.toString());
-//            }
-//
-//        }else{
-//            //公司成员
-//            String userTicket = (String) response.get("user_ticket");
-//            //获取访问用户敏感信息
-//            JSONObject postJson = new JSONObject();
-//            postJson.put("user_ticket",userTicket);
-//            String url = String.format(qywxInnerConfig.getOauthUserDetailUrl(),accessToken);
-//            detaiResponse = RestUtils.post(url,postJson);
-//            //获取错误日志
-//            if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
-//                logger.error(detaiResponse.toString());
-//            }
-//            detaiResponse.put("user_type",0);
-//        }
-//
-//        return detaiResponse;
-//
-//    }
+    public Map getSchoolOauthUser(String code) {
+
+        String accessToken = getaccessToken();
+        //获取访问用户身份
+        String getOauthUrl = String.format(qywxInnerConfig.getSchoolOauthUserUrl(),accessToken,code);
+        Map  response = RestUtils.get(getOauthUrl);
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+            return  response;
+        }
+
+        Map detaiResponse = new HashMap();
+        //家长
+        if(response.containsKey("external_userid")){
+
+
+            //https://work.weixin.qq.com/api/doc/90001/90143/91711
+
+            String coprId = (String) response.get("CorpId");
+            String accessToken = this.getAccessToken(coprId);
+
+            ArrayList parentsArray = (ArrayList) response.get("parents");
+            if(parentsArray.size()<0){
+                JsonData.buildError("无家长信息");
+            }
+            HashMap parentsMap = (HashMap) parentsArray.get(0);
+            String userId = (String) parentsMap.get("parent_userid");
+            //获取访问用户敏感信息
+            //https://work.weixin.qq.com/api/doc/90001/90143/92038
+            String url = String.format(qywxInnerConfig.getSchoolUserGetUrl(),accessToken,userId);
+            detaiResponse = RestUtils.get(url);
+            //获取错误日志
+            if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
+                logger.error(detaiResponse.toString());
+            }
+
+        }else{
+            //公司成员
+            String userTicket = (String) response.get("user_ticket");
+            //获取访问用户敏感信息
+            JSONObject postJson = new JSONObject();
+            postJson.put("user_ticket",userTicket);
+            String url = String.format(qywxInnerConfig.getOauthUserDetailUrl(),accessToken);
+            detaiResponse = RestUtils.post(url,postJson);
+            //获取错误日志
+            if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
+                logger.error(detaiResponse.toString());
+            }
+            detaiResponse.put("user_type",0);
+        }
+
+        return detaiResponse;
+
+    }
 
     public Map getSchoolDepartmentList(String corpId,String deptId){
         String accessToken = this.getAccessToken(corpId);

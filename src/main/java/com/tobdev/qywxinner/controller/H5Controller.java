@@ -42,12 +42,6 @@ public class H5Controller {
         String oauthRedirectUrl =  URLEncoder.encode(oauthCallback,"utf-8");
         String oauthUrl = qywxInnerService.getOauthUrl(corpId,oauthRedirectUrl);
         resData.put("oauth_url",oauthUrl);
-
-        //家长应用
-//        String schoolOauthRedirectUrl = CommonUtils.RouteToUrl(request,"/h5/oauth_callback");
-//        String schoolOauthUrl = qywxInnerService.getSchoolOauthUrl(corpId,schoolOauthRedirectUrl);
-//        resData.put("school_oauth_url",schoolOauthUrl);
-
         return  JsonData.buildSuccess(resData);
     }
 

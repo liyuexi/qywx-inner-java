@@ -6,6 +6,7 @@ import com.tobdev.qywxinner.service.QywxInnerService;
 import com.tobdev.qywxinner.utils.CommonUtils;
 import com.tobdev.qywxinner.utils.CookieUtils;
 import com.tobdev.qywxinner.utils.JWTUtils;
+import com.tobdev.qywxinner.utils.JsonData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.Map;
 
 @Controller
@@ -26,44 +30,26 @@ public class SchoolController {
     private QywxInnerService qywxInnerService;
 
 
-    @RequestMapping({"/school/index"})
-    String index(HttpServletRequest request, ModelMap model){
-        String corpId = (String) request.getAttribute("corp_id");
-        //没有登录去登录
-        String schoolOauthRedirectUrl = CommonUtils.RouteToUrl(request,"/school/oauth_callback");
-        String schoolOauthUrl = qywxInnerService.getSchoolOauthUrl(corpId,schoolOauthRedirectUrl);
-        model.put("school_oauth_url",schoolOauthUrl);
+    @RequestMapping({"/school/oauthUrl"})
+    JsonData oauthUrl(HttpServletRequest request,@RequestParam("corp_id") String corpId,@RequestParam("oauth_callback") String oauthCallback) throws UnsupportedEncodingException {
+        Map resData = new HashMap();
 
-        String schoolDepartmentUrl = CommonUtils.RouteToUrl(request,"/school/department_list");
-        model.put("school_department_url",schoolDepartmentUrl);
+        String oauthRedirectUrl =  URLEncoder.encode(oauthCallback,"utf-8");
+        String schoolOauthUrl = qywxInnerService.getSchoolOauthUrl(corpId,oauthRedirectUrl);
+        resData.put("oauth_url",schoolOauthUrl);
+        return  JsonData.buildSuccess(resData);
 
-        String schoolUserUrl = CommonUtils.RouteToUrl(request,"/school/user_list");
-        model.put("school_user_url",schoolUserUrl);
-
-        String schoolMessageUrl = CommonUtils.RouteToUrl(request,"/school/messageSend");
-        model.put("school_message_url",schoolMessageUrl);
-
-
-        //当前登录身份
-        String userId = (String) request.getAttribute("user_id");
-
-
-        model.put("access_token",qywxInnerService.getAccessToken(corpId));
-
-
-        model.put("user_id",userId);
-        model.put("corp_id",corpId);
-
-
-        return  "school/index";
     }
 
-    @RequestMapping("/school/oauth_callback")
+    @RequestMapping("/school/oauthUser")
     @ResponseBody
-    public void oauthCallback(HttpServletRequest request, HttpServletResponse response, @RequestParam("code") String code) throws IOException {
-        //通过code获取信息
+    JsonData  oauthCallback(HttpServletRequest request,HttpServletResponse response,@RequestParam("corp_id") String corpId,@RequestParam("code") String code) throws IOException {
 
+        //通过code获取信息
+        Map result = qywxInnerService.getSchoolOauthUser(corpId,code);
 //        Map result = qywxInnerService.getSchoolOauthUser(code);
+
+
 //        System.out.println(result);
 //        //查数据库获取人员
 //        //人员已侦破产生token登录  //本案例仅从企业微信接口获取未从数据表中获取
