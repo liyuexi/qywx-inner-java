@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "qywx-third")
+@ConfigurationProperties(prefix = "qywx-inner")
 public class QywxInnerConfig {
 
     private String corpId;
@@ -53,8 +53,16 @@ public class QywxInnerConfig {
     private String extContactFollowUserListUrl = baseUrl+"externalcontact/get_follow_user_list?access_token=%s";
     //获取客户列表 https://open.work.weixin.qq.com/api/doc/90000/90135/92113
     private String extContactListUrl = baseUrl+"externalcontact/list?access_token=%s&userid=%s";
+    //获取客户详情 https://open.work.weixin.qq.com/api/doc/90000/90135/92114
+    private String extContactDetailUrl = baseUrl+"/externalcontact/get?access_token=%s&external_userid=%s&cursor=%s";
     //获取客户群列表 https://open.work.weixin.qq.com/api/doc/90000/90135/92120
-    private String extContactGroupchatUrl = baseUrl+"externalcontact/groupchat/list?access_token=%s";
+    private String extContactGroupchatListUrl = baseUrl+"externalcontact/groupchat/list?access_token=%s";
+    //获取客户群详情 https://open.work.weixin.qq.com/api/doc/90000/90135/92122
+    private String extContactGroupchatDetailUrl = baseUrl+"externalcontact/groupchat/get?access_token=%s";
+    //添加新客户欢迎 https://open.work.weixin.qq.com/api/doc/90000/90135/92137
+    private String extcontactSendWelcomeMsgUrl = baseUrl+"externalcontact/send_welcome_msg?access_token=%s";
+    //创建企业群发 https://open.work.weixin.qq.com/api/doc/90000/90135/92135
+    private String extcontactAddMsgTemplateUrl = baseUrl+"externalcontact/add_msg_template?access_token=%s";
 
     //消息推送
     //https://open.work.weixin.qq.com/api/doc/90000/90135/90236
@@ -76,7 +84,7 @@ public class QywxInnerConfig {
     private String oaGetApprovalUrl ="oa/getapprovaldetail?access_token=%s";
 
     //审批流程引擎 https://work.weixin.qq.com/api/doc/90001/90143/93798
-    private String openApprovalDataUrl = baseUrl+"corp/getopenapprovaldata?access_token=ACCESS_TOKEN";
+    private String openApprovalDataUrl = baseUrl+"corp/getopenapprovaldata?access_token=%s";
 
 
     // H5应用
@@ -93,11 +101,12 @@ public class QywxInnerConfig {
     //家校沟通
     //https://work.weixin.qq.com/api/doc/90000/90135/91638
     private String extContactMessageSendUrl = baseUrl+"externalcontact/message/send?access_token=%s";
+    private String extContactSubscribeQrUrl =  baseUrl+"externalcontact/get_subscribe_qr_code?access_token=%s";
 
     //此oauth与H5oauth一致  https://work.weixin.qq.com/api/doc/90000/90135/91857
     private String schoolOauthUrl = "https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s#wechat_redirect";
     //https://work.weixin.qq.com/api/doc/90000/90135/91707
-    private String schoolOauthUserUrl = "user/getuserinfo?access_token=%s&code=%s";
+    private String schoolOauthUserUrl = baseUrl+"user/getuserinfo?access_token=%s&code=%s";
 
     private String schoolUrl = baseUrl+"school/";
     //https://work.weixin.qq.com/api/doc/90000/90135/92337
@@ -107,7 +116,16 @@ public class QywxInnerConfig {
     //https://work.weixin.qq.com/api/doc/90000/90135/92446
     private String schoolUserListUrl = schoolUrl+"user/list?access_token=%s&department_id=%s&fetch_child=%s";
 
-
+    //效率工具
+    private String calendarAddUrl = baseUrl+"oa/calendar/add?access_token=%s";
+    private String calendarDetailUrl = baseUrl+"oa/calendar/get?access_token=%s";
+    private String scheduleAddUrl = baseUrl+"oa/schedule/add?access_token=%s";
+    private String scheduleListUrl = baseUrl+"oa/schedule/get_by_calendar?access_token=%s";
+    private String scheduleDetailUrl = baseUrl+"oa/schedule/del?access_token=%s";
+    private String meetingCreateUrl =  baseUrl+"meeting/create?access_token=%s";
+    private String userMeetingListUrl = baseUrl+"meeting/get_user_meetingid?access_token=%s";
+    private String meetingCancelUrl =  baseUrl+"meeting/cancel?access_token=%s";
+    private String meetingDetailUrl = baseUrl+"meeting/get_info?access_token=%s";
 
     //小程序应用
     //小程序登录流程 https://work.weixin.qq.com/api/doc/90000/90136/92426
@@ -235,8 +253,8 @@ public class QywxInnerConfig {
         return extContactListUrl;
     }
 
-    public String getExtContactGroupchatUrl() {
-        return extContactGroupchatUrl;
+    public String getExtContactGroupchatListUrl() {
+        return extContactGroupchatListUrl;
     }
 
     public String getMessageSendUrl() {
@@ -302,7 +320,9 @@ public class QywxInnerConfig {
     public String getExtContactMessageSendUrl() {
         return extContactMessageSendUrl;
     }
-
+    public String getExtContactSubscribeQrUrl() {
+        return extContactSubscribeQrUrl;
+    }
     public String getSsoUserInfoUrl() {
         return ssoUserInfoUrl;
     }
@@ -326,4 +346,57 @@ public class QywxInnerConfig {
     public String getAgentMenuDeleteUrl() {
         return AgentMenuDeleteUrl;
     }
+
+    public String getExtContactDetailUrl() {
+        return extContactDetailUrl;
+    }
+
+    public String getExtcontactSendWelcomeMsgUrl() {
+        return extcontactSendWelcomeMsgUrl;
+    }
+
+    public String getExtContactGroupchatDetailUrl() {
+        return extContactGroupchatDetailUrl;
+    }
+
+    public String getExtcontactAddMsgTemplateUrl() {
+        return extcontactAddMsgTemplateUrl;
+    }
+
+    public String getCalendarAddUrl() {
+        return calendarAddUrl;
+    }
+
+    public String getCalendarDetailUrl() {
+        return calendarDetailUrl;
+    }
+
+    public String getScheduleAddUrl() {
+        return scheduleAddUrl;
+    }
+
+    public String getScheduleListUrl() {
+        return scheduleListUrl;
+    }
+
+    public String getScheduleDetailUrl() {
+        return scheduleDetailUrl;
+    }
+
+    public String getMeetingCreateUrl() {
+        return meetingCreateUrl;
+    }
+
+    public String getUserMeetingListUrl() {
+        return userMeetingListUrl;
+    }
+
+    public String getMeetingCancelUrl() {
+        return meetingCancelUrl;
+    }
+
+    public String getMeetingDetailUrl() {
+        return meetingDetailUrl;
+    }
+
 }

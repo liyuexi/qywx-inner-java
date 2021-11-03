@@ -4,10 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.tobdev.qywxinner.config.QywxCacheConfig;
 import com.tobdev.qywxinner.config.QywxInnerConfig;
 import com.tobdev.qywxinner.model.entity.QywxInnerCompany;
-import com.tobdev.qywxinner.utils.QywxSHA;
-import com.tobdev.qywxinner.utils.RedisUtils;
-import com.tobdev.qywxinner.utils.RestUtils;
-import com.tobdev.qywxinner.utils.SnowFlakeUtils;
+import com.tobdev.qywxinner.utils.*;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -190,15 +188,35 @@ public class QywxInnerService {
 
     }
 
+    //获取客户详情
+    public Map getExtContactDetail(String corpId,String extUserId){
+
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactDetailUrl(),accessToken,extUserId,"") ;
+
+        JSONObject response = RestUtils.get(url);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
+
+    }
+
     //获取配置过客户群管理的客户群列表。
     public Map getExtContactGroupchatList(String corpId,String userId){
 
         //https://open.work.weixin.qq.com/api/doc/90001/90143/93414
         String accessToken = this.getAccessToken(corpId);
-        String url = String.format(qywxInnerConfig.getExtContactGroupchatUrl(),accessToken) ;
+        String url = String.format(qywxInnerConfig.getExtContactGroupchatListUrl(),accessToken) ;
 
         //分页，预期请求的数据量，取值范围 1 ~ 1000  测试写死1000
         JSONObject postJson = new JSONObject();
+        ArrayList ownerList = new ArrayList();
+        ownerList.add(userId);
+        JSONObject ownerJson = new JSONObject();
+        ownerJson.put( "userid_list",ownerList);
+        postJson.put("owner_filter",ownerJson);
         //owner_filter  userid_list	否	用户ID列表。最多100个
         postJson.put("limit",1000);
         JSONObject response = RestUtils.post(url,postJson);
@@ -209,6 +227,116 @@ public class QywxInnerService {
         return  response;
 
     }
+
+    //获取群聊详情
+    public Map   getExtContactGroupchatDetail(String corpId,String chatId){
+
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactGroupchatDetailUrl(),accessToken) ;
+
+        JSONObject postJson = new JSONObject();
+        postJson.put("chat_id",chatId);
+        postJson.put("need_name",1);
+        JSONObject response = RestUtils.post(url,postJson);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
+
+    }
+
+    //发送客户欢迎语
+    public Map   sendWelcomeMsg(String corpId,String welcomeCode,String text){
+
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactGroupchatDetailUrl(),accessToken) ;
+        /*
+        {
+            "welcome_code":"CALLBACK_CODE",
+            "text":{
+                "content":"文本消息内容"
+            },
+           "attachments": [
+                  {
+                    "msgtype":"link",
+                    "link":{
+                    "title":"消息标题",
+                    "picurl":"https://example.pic.com/path",
+                    "desc":"消息描述",
+                    "url":"https://example.link.com/path"
+                    }
+                },
+             ]
+        }
+        */
+        JSONObject postJson = new JSONObject();
+        postJson.put("welcome_code",welcomeCode);
+
+        JSONObject textContentJson = new JSONObject();
+        textContentJson.put("content",text);
+        postJson.put("text",textContentJson);
+
+        JSONObject response = RestUtils.post(url,postJson);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
+
+    }
+
+    //创建企业群发
+    public Map  addMsgTemplate(String corpId,ArrayList extUserList,String sender,String text){
+
+        /**
+         * {
+         *     "chat_type": "single",
+         *     "external_userid": [
+         *         "woAJ2GCAAAXtWyujaWJHDDGi0mACAAAA",
+         *         "wmqfasd1e1927831123109rBAAAA"
+         *     ],
+         *     "sender": "zhangsan",
+         *     "text": {
+         *         "content": "文本消息内容"
+         *     },
+         *     "attachments": [
+     *           {
+         *         "msgtype": "link",
+         *         "link": {
+         *             "title": "消息标题",
+         *             "picurl": "https://example.pic.com/path",
+         *             "desc": "消息描述",
+         *             "url": "https://example.link.com/path"
+         *          }
+     *           },
+         *     】
+         * }
+         */
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtcontactAddMsgTemplateUrl(),accessToken) ;
+
+        JSONObject postJson = new JSONObject();
+        postJson.put("chat_type","single");
+
+        postJson.put("external_userid",extUserList);
+
+        postJson.put("sender",sender);
+
+        JSONObject textContentJson = new JSONObject();
+        textContentJson.put("content",text);
+        postJson.put("text",textContentJson);
+
+
+        JSONObject response = RestUtils.post(url,postJson);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
+
+    }
+
 
 
     //**********************************  消息相关   *************************//
@@ -314,12 +442,14 @@ public class QywxInnerService {
 
     }
 
+
     //**********************************  oa审批相关   *************************//
 
     //审批流程引擎
-    public Map getApprovalFlow(){
+    public Map getAprrovalFlowInit(String corpId){
+        QywxInnerCompany company = qywxInnerCompanyService.getCompanyByCorpId(corpId);
         Map approval = new HashMap();
-        approval.put("templateId",qywxInnerConfig.getApprovalFlowId());
+        approval.put("templateId",company.getApprovalTemplateId());
         approval.put("thirdNo",new SnowFlakeUtils(0, 0).createOrderNo());
         return approval;
     }
@@ -330,6 +460,141 @@ public class QywxInnerService {
         JSONObject postJson = new JSONObject();
         postJson.put("thirdNo",thirdNo);
         return RestUtils.post(approvalUrl,postJson);
+    }
+
+    //**********************************  效率工具相关   *************************//
+    public  Map addCalendar(String corpId,String summary,String color,String organizeUserId,String shareUserId){
+        String accessToken = this.getAccessToken(corpId);
+
+        String url = String.format(qywxInnerConfig.getCalendarAddUrl(),accessToken) ;
+
+        JSONObject postJson = new JSONObject();
+
+        JSONObject calendarJson = new JSONObject();
+        calendarJson.put("organizer",organizeUserId);
+        calendarJson.put("summary",summary);
+        calendarJson.put("color",color);
+        ArrayList sharesArr =  new ArrayList();
+        JSONObject shareJson = new JSONObject();
+        shareJson.put("userid",shareUserId);
+        sharesArr.add(shareJson);
+        calendarJson.put("shares",sharesArr);
+
+        postJson.put("calendar",calendarJson);
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
+    }
+
+    public  Map getCalendar(String corpId,String calendarId){
+        String accessToken = this.getAccessToken(corpId);
+
+        String url = String.format(qywxInnerConfig.getCalendarDetailUrl(),accessToken) ;
+
+        JSONObject postJson = new JSONObject();
+        ArrayList calendarArr =  new ArrayList();
+        calendarArr.add(calendarId);
+        postJson.put("cal_id_list",calendarArr);
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
+
+    }
+
+    public  Map addSchedule(String corpId,String organizeUserId,String attendeesUserId,String summary,String description){
+        String accessToken = this.getAccessToken(corpId);
+
+        String url = String.format(qywxInnerConfig.getScheduleAddUrl(),accessToken) ;
+
+        JSONObject postJson = new JSONObject();
+
+        JSONObject scheduleJson = new JSONObject();
+        scheduleJson.put("organizer",organizeUserId);
+        scheduleJson.put("summary",summary);
+        scheduleJson.put("description",description);
+        ArrayList attendeesArr =  new ArrayList();
+        JSONObject attendeesJson = new JSONObject();
+        attendeesJson.put("userid",attendeesUserId);
+        attendeesArr.add(attendeesJson);
+        scheduleJson.put("attendees",attendeesArr);
+
+        postJson.put("schedule",scheduleJson);
+
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
+
+    }
+
+    public  Map getScheduleList(String corpId,String calendarId,String offset,String limit){
+        String accessToken = this.getAccessToken(corpId);
+
+        String url = String.format(qywxInnerConfig.getScheduleListUrl(),accessToken) ;
+
+        JSONObject postJson = new JSONObject();
+        postJson.put("cal_id",calendarId);
+        postJson.put("offset",offset);
+        postJson.put("limit",limit);
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
+
+    }
+
+    public  Map getSchedule(String corpId,String scheduleId){
+        String accessToken = this.getAccessToken(corpId);
+
+        String url = String.format(qywxInnerConfig.getScheduleDetailUrl(),accessToken) ;
+        JSONObject postJson = new JSONObject();
+        ArrayList scheduleArr =  new ArrayList();
+        scheduleArr.add(scheduleId);
+        postJson.put("schedule_id_list",scheduleArr);
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
+    }
+
+    
+    public  Map addMeeting(String corpId,String createUserId,String title,String meetingStart,String meetingDuration,String type){
+        String accessToken = this.getAccessToken(corpId);
+
+        String url = String.format(qywxInnerConfig.getMeetingCreateUrl(),accessToken) ;
+
+        JSONObject postJson = new JSONObject();
+        postJson.put("creator_userid",createUserId);
+        postJson.put("title",title);
+        postJson.put("meeting_start",meetingStart);
+        postJson.put("meeting_duration",meetingDuration);
+        postJson.put("type",type);
+
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
+    }
+
+    public  Map getUserMeeting(String corpId,String userId){
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getUserMeetingListUrl(),accessToken) ;
+        JSONObject postJson = new JSONObject();
+        postJson.put("userid",userId);
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
+    }
+
+    public Map  cancelMeeting(String corpId,String meetingId){
+
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getMeetingCancelUrl(),accessToken) ;
+        JSONObject postJson = new JSONObject();
+        postJson.put("meeting_id",meetingId);
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
+
+    }
+
+    public Map getMeetingDetail(String corpId,String meetingId){
+
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getMeetingDetailUrl(),accessToken) ;
+
+        JSONObject postJson = new JSONObject();
+        postJson.put("meetingid",meetingId);
+        JSONObject response = RestUtils.post(url,postJson);
+        return  response;
     }
 
     //**********************************  PC相关   *************************//
@@ -502,9 +767,9 @@ public class QywxInnerService {
 
     }
 
-    public Map getSchoolOauthUser(String code) {
+    public Map getSchoolOauthUser(String corpId,String code) {
 
-        String accessToken = getaccessToken();
+        String accessToken = this.getAccessToken(corpId);
         //获取访问用户身份
         String getOauthUrl = String.format(qywxInnerConfig.getSchoolOauthUserUrl(),accessToken,code);
         Map  response = RestUtils.get(getOauthUrl);
@@ -515,45 +780,45 @@ public class QywxInnerService {
 
         Map detaiResponse = new HashMap();
         //家长
-        if(response.containsKey("external_userid")){
-
-
-            //https://work.weixin.qq.com/api/doc/90001/90143/91711
-
-            String coprId = (String) response.get("CorpId");
-            String accessToken = this.getAccessToken(coprId);
-
-            ArrayList parentsArray = (ArrayList) response.get("parents");
-            if(parentsArray.size()<0){
-                JsonData.buildError("无家长信息");
-            }
-            HashMap parentsMap = (HashMap) parentsArray.get(0);
-            String userId = (String) parentsMap.get("parent_userid");
-            //获取访问用户敏感信息
-            //https://work.weixin.qq.com/api/doc/90001/90143/92038
+        if(response.containsKey("parent_userid")){
+            //https://work.weixin.qq.com/api/doc/90000/90135/92337
+            String userId = (String) response.get("parent_userid");
             String url = String.format(qywxInnerConfig.getSchoolUserGetUrl(),accessToken,userId);
             detaiResponse = RestUtils.get(url);
             //获取错误日志
             if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
                 logger.error(detaiResponse.toString());
             }
-
-        }else{
-            //公司成员
-            String userTicket = (String) response.get("user_ticket");
-            //获取访问用户敏感信息
-            JSONObject postJson = new JSONObject();
-            postJson.put("user_ticket",userTicket);
-            String url = String.format(qywxInnerConfig.getOauthUserDetailUrl(),accessToken);
-            detaiResponse = RestUtils.post(url,postJson);
+        }else if(response.containsKey("UserId")){
+            //获取通讯录用户详情get
+            String userId = (String) response.get("UserId");
+            String url = String.format(qywxInnerConfig.getUserDetailUrl(),accessToken,userId);
+            detaiResponse = RestUtils.get(url);
             //获取错误日志
             if(detaiResponse.containsKey("errcode") && (Integer) detaiResponse.get("errcode") != 0){
                 logger.error(detaiResponse.toString());
             }
             detaiResponse.put("user_type",0);
+
+        }else{
+            //
         }
 
         return detaiResponse;
+
+    }
+
+    public  Map getSubscribeQr(String corpId){
+
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactSubscribeQrUrl(),accessToken) ;
+
+        JSONObject response = RestUtils.get(url);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
 
     }
 
@@ -569,6 +834,8 @@ public class QywxInnerService {
         return  response;
     }
 
+
+
     public Map getSchoolUserList(String corpId,String deptId,String fetchChild){
         String accessToken = this.getAccessToken(corpId);
         String url = String.format(qywxInnerConfig.getSchoolUserListUrl(),accessToken,deptId,fetchChild) ;
@@ -582,7 +849,20 @@ public class QywxInnerService {
 
     }
 
-    public Map extContactMessageSend(String corpId,String studentUserid,String text){
+    public Map getSchoolUserDetail(String corpId,String deptId){
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getSchoolUserGetUrl(),accessToken,deptId) ;
+
+        JSONObject response = RestUtils.get(url);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
+    }
+
+
+    public Map sendExtContactMessageText(String corpId,String toParentUserId,String toStudentUserId,String text){
 
         String accessToken = this.getAccessToken(corpId);
         String url = String.format(qywxInnerConfig.getExtContactMessageSendUrl(),accessToken) ;
@@ -594,7 +874,17 @@ public class QywxInnerService {
         JSONObject postJson = new JSONObject();
         postJson.put("msgtype","text");
         postJson.put("agentid",agentId);
-        postJson.put("to_student_userid",studentUserid);
+
+        if(StringUtils.isNoneBlank(toParentUserId)){
+            ArrayList toParentArr = new ArrayList<>();
+            toParentArr.add(toParentUserId);
+            postJson.put("to_parent_userid",toParentArr);
+        }
+        if(StringUtils.isNoneBlank(toStudentUserId)){
+            ArrayList toStudentArr = new ArrayList<>();
+            toStudentArr.add(toStudentUserId);
+            postJson.put("to_student_userid",toStudentArr);
+        }
 
         JSONObject testJson =  new JSONObject();
         testJson.put("content",text);
@@ -606,8 +896,42 @@ public class QywxInnerService {
             logger.error(response.toString());
         }
         return  response;
-
     }
+
+    public Map sendExtContactMessageImage(String corpId,String toParentUserId,String toStudentUserId,String mediaId){
+
+        String accessToken = this.getAccessToken(corpId);
+        String url = String.format(qywxInnerConfig.getExtContactMessageSendUrl(),accessToken) ;
+
+        //获取企业的agentid
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
+        Integer agentId = company.getAgentId();
+
+        JSONObject postJson = new JSONObject();
+        postJson.put("msgtype","image");
+        postJson.put("agentid",agentId);
+        if(StringUtils.isNoneBlank(toParentUserId)){
+            ArrayList toParentArr = new ArrayList<>();
+            toParentArr.add(toParentUserId);
+            postJson.put("to_parent_userid",toParentArr);
+        }
+        if(StringUtils.isNoneBlank(toStudentUserId)){
+            ArrayList toStudentArr = new ArrayList<>();
+            toStudentArr.add(toStudentUserId);
+            postJson.put("to_student_userid",toStudentArr);
+        }
+
+        JSONObject testJson =  new JSONObject();
+        testJson.put("media_id",mediaId);
+        postJson.put("image",testJson);
+        JSONObject response = RestUtils.post(url,postJson);
+        //获取错误日志
+        if(response.containsKey("errcode") && (Integer) response.get("errcode") != 0){
+            logger.error(response.toString());
+        }
+        return  response;
+    }
+
 
     //******************************  小程序应用   *********************//
     public Map getCode2sessionUser(String corpId,String code){

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -108,32 +109,50 @@ public class MessageController {
         InputSource is = new InputSource(sr);
         Document document = db.parse(is);
 
+
         Element root = document.getDocumentElement();
-        NodeList nodelist1 = root.getElementsByTagName("Content");
-        String Content = nodelist1.item(0).getTextContent();
-        System.out.println("Content：" + Content);
 
-        NodeList nodelist2 = root.getElementsByTagName("FromUserName");
-        String fromUserName = nodelist2.item(0).getTextContent();
+        NodeList typeNodelist = root.getElementsByTagName("MsgType");
+        String MsgType = typeNodelist.item(0).getTextContent();
 
+        if (StringUtils.equals(MsgType,"event") ){
+            NodeList eventNodelist = root.getElementsByTagName("Event");
+            String eventType = eventNodelist.item(0).getTextContent();
+            if(StringUtils.equals(eventType,"open_approval_change")){
+                NodeList approvalNodelist = root.getElementsByTagName("ApprovalInfo");
+                Element approval = (Element) approvalNodelist.item(0);
+                String tirdId =  approval.getElementsByTagName("ThirdNo").item(0).getTextContent();
+                String status =  approval.getElementsByTagName("OpenSpStatus").item(0).getTextContent();
+                //可以用于自身业务系统记录
+                System.out.println("tirdId：" + tirdId+" status:"+status);
+            }
+        }else {
 
+            NodeList nodelist1 = root.getElementsByTagName("Content");
+            String Content = nodelist1.item(0).getTextContent();
+            System.out.println("Content：" + Content);
 
-        String data = "<xml><ToUserName><![CDATA["+fromUserName +"]]></ToUserName><FromUserName><![CDATA[wwe58c8eb857ded23d]]></FromUserName><CreateTime>"+sReqTimeStamp+"</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[this is a test]]></Content></xml>";
-        try{
-            String sEncryptMsg = wxcpt.EncryptMsg(data, sReqTimeStamp, sReqNonce);
-           return  sEncryptMsg;
-            // 加密成功
-            // TODO:
-            // HttpUtils.SetResponse(sEncryptMsg);
+            NodeList nodelist2 = root.getElementsByTagName("FromUserName");
+            String fromUserName = nodelist2.item(0).getTextContent();
+
+            String data = "<xml><ToUserName><![CDATA["+fromUserName +"]]></ToUserName><FromUserName><![CDATA[wwe58c8eb857ded23d]]></FromUserName><CreateTime>"+sReqTimeStamp+"</CreateTime><MsgType><![CDATA[text]]></MsgType><Content><![CDATA[this is a test]]></Content></xml>";
+            try{
+                String sEncryptMsg = wxcpt.EncryptMsg(data, sReqTimeStamp, sReqNonce);
+                return  sEncryptMsg;
+                // 加密成功
+                // TODO:
+                // HttpUtils.SetResponse(sEncryptMsg);
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+                // 加密失败
+            }
+
         }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            // 加密失败
-        }
 
 
-        return  "xxxx";
+        return  "";
 
     }
 

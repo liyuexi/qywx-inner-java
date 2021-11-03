@@ -12,6 +12,15 @@ public class QywxInnerCompany {
     private String corpFullName;
     private Integer subjectType;
     private String verifiedEndTime;
+    private String approvalTemplateId;
+
+    public String getApprovalTemplateId() {
+        return approvalTemplateId;
+    }
+
+    public void setApprovalTemplateId(String approvalTemplateId) {
+        this.approvalTemplateId = approvalTemplateId;
+    }
 
     private Integer status;
 
