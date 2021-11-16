@@ -121,7 +121,7 @@ public class QywxInnerConfig {
     private String calendarDetailUrl = baseUrl+"oa/calendar/get?access_token=%s";
     private String scheduleAddUrl = baseUrl+"oa/schedule/add?access_token=%s";
     private String scheduleListUrl = baseUrl+"oa/schedule/get_by_calendar?access_token=%s";
-    private String scheduleDetailUrl = baseUrl+"oa/schedule/del?access_token=%s";
+    private String scheduleDetailUrl = baseUrl+"oa/schedule/get?access_token=%s";
     private String meetingCreateUrl =  baseUrl+"meeting/create?access_token=%s";
     private String userMeetingListUrl = baseUrl+"meeting/get_user_meetingid?access_token=%s";
     private String meetingCancelUrl =  baseUrl+"meeting/cancel?access_token=%s";

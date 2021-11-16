@@ -463,7 +463,7 @@ public class QywxInnerService {
     }
 
     //**********************************  效率工具相关   *************************//
-    public  Map addCalendar(String corpId,String summary,String color,String organizeUserId,String shareUserId){
+    public  Map addCalendar(String corpId,String summary,String color,String organizeUserId,ArrayList shareUserArr){
         String accessToken = this.getAccessToken(corpId);
 
         String url = String.format(qywxInnerConfig.getCalendarAddUrl(),accessToken) ;
@@ -474,15 +474,13 @@ public class QywxInnerService {
         calendarJson.put("organizer",organizeUserId);
         calendarJson.put("summary",summary);
         calendarJson.put("color",color);
-        ArrayList sharesArr =  new ArrayList();
-        JSONObject shareJson = new JSONObject();
-        shareJson.put("userid",shareUserId);
-        sharesArr.add(shareJson);
-        calendarJson.put("shares",sharesArr);
+        calendarJson.put("shares",shareUserArr);
 
         postJson.put("calendar",calendarJson);
+        System.out.print(postJson);
         JSONObject response = RestUtils.post(url,postJson);
         return  response;
+
     }
 
     public  Map getCalendar(String corpId,String calendarId){
@@ -499,25 +497,21 @@ public class QywxInnerService {
 
     }
 
-    public  Map addSchedule(String corpId,String organizeUserId,String attendeesUserId,String summary,String description){
+    public  Map addSchedule(String corpId,String organizeUserId,ArrayList attendeesArr,String summary,Integer startTime,Integer endTime,String calendarId){
         String accessToken = this.getAccessToken(corpId);
 
         String url = String.format(qywxInnerConfig.getScheduleAddUrl(),accessToken) ;
-
+        QywxInnerCompany company = qywxInnerCompanyService.getCompanyByCorpId(corpId);
         JSONObject postJson = new JSONObject();
-
+        postJson.put("agentid",company.getAgentId());
         JSONObject scheduleJson = new JSONObject();
         scheduleJson.put("organizer",organizeUserId);
         scheduleJson.put("summary",summary);
-        scheduleJson.put("description",description);
-        ArrayList attendeesArr =  new ArrayList();
-        JSONObject attendeesJson = new JSONObject();
-        attendeesJson.put("userid",attendeesUserId);
-        attendeesArr.add(attendeesJson);
         scheduleJson.put("attendees",attendeesArr);
-
+        scheduleJson.put("start_time",startTime);
+        scheduleJson.put("end_time",endTime);
+        scheduleJson.put("cal_id",calendarId);
         postJson.put("schedule",scheduleJson);
-
         JSONObject response = RestUtils.post(url,postJson);
         return  response;
 
@@ -550,18 +544,24 @@ public class QywxInnerService {
     }
 
     
-    public  Map addMeeting(String corpId,String createUserId,String title,String meetingStart,String meetingDuration,String type){
+    public  Map addMeeting(String corpId,String createUserId,ArrayList attendees,String title,String startTime,String meetingDuration,String type){
         String accessToken = this.getAccessToken(corpId);
+        QywxInnerCompany company = qywxInnerCompanyService.getCompanyByCorpId(corpId);
 
         String url = String.format(qywxInnerConfig.getMeetingCreateUrl(),accessToken) ;
 
         JSONObject postJson = new JSONObject();
+        postJson.put("agentid",company.getAgentId());
         postJson.put("creator_userid",createUserId);
         postJson.put("title",title);
-        postJson.put("meeting_start",meetingStart);
+        postJson.put("meeting_start",startTime);
         postJson.put("meeting_duration",meetingDuration);
         postJson.put("type",type);
-
+        JSONObject attendeesJson = new JSONObject();
+        attendeesJson.put("userid",attendees);
+        postJson.put("attendees",attendeesJson);
+        System.out.println(url);
+        System.out.println(postJson);
         JSONObject response = RestUtils.post(url,postJson);
         return  response;
     }
