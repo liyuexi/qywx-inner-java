@@ -13,12 +13,12 @@ https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzA5ODcyODY0Nw==&action=getalbum&a
 后端java+springboot:https://github.com/liyuexi/qywx-inner-java  
 
 在线Demo地址：  
-https://h5test.tobdev.com    
+http://h5test.tobdev.com    
 进入应用后点菜单设置进行应用设置
 
 ##企业微信自自建内部应用后端demo
 ### 在线Demo
-https://h5test.tobdev.com  
+http://h5test.tobdev.com  
 进入应用后点菜单设置进行应用设置
 
 ### 最近更新  
