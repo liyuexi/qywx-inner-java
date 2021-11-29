@@ -64,7 +64,7 @@ public class QywxInnerService {
         String accessToken = getAccessToken(corpId);
         //获取企业的agentid
         QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
-        Integer agentId = company.getAgentId();
+        String agentId = company.getAgentId();
         String url = String.format(qywxInnerConfig.getAgentGetUrl(),accessToken,agentId);
         Map response = RestUtils.get(url);
         //获取错误日志
@@ -86,7 +86,7 @@ public class QywxInnerService {
         String url = String.format(qywxInnerConfig.getAgentSetUrl(),accessToken) ;
         //获取企业的agentid
         QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
-        Integer agentId = company.getAgentId();
+        String agentId = company.getAgentId();
 
         postJson.put("agentid",agentId);
         JSONObject response = RestUtils.post(url,postJson);
@@ -350,7 +350,7 @@ public class QywxInnerService {
         String url = String.format(qywxInnerConfig.getMessageSendUrl(),accessToken) ;
         //获取企业的agentid
         QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
-        Integer agentId = company.getAgentId();
+        String agentId = company.getAgentId();
 
         JSONObject postJson = new JSONObject();
         postJson.put("msgtype","text");
@@ -379,7 +379,7 @@ public class QywxInnerService {
         String url = String.format(qywxInnerConfig.getMessageSendUrl(),accessToken) ;
         //获取企业的agentid
         QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
-        Integer agentId = company.getAgentId();
+        String agentId = company.getAgentId();
 
         JSONObject postJson = new JSONObject();
         postJson.put("msgtype","image");
@@ -744,7 +744,7 @@ public class QywxInnerService {
 
         //获取appid
         QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
-        Integer agentId = company.getAgentId();
+        String agentId = company.getAgentId();
 
         HashMap result = new HashMap();
         result.put("corpId", corpId);
@@ -869,7 +869,7 @@ public class QywxInnerService {
 
         //获取企业的agentid
         QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
-        Integer agentId = company.getAgentId();
+        String agentId = company.getAgentId();
 
         JSONObject postJson = new JSONObject();
         postJson.put("msgtype","text");
@@ -905,7 +905,7 @@ public class QywxInnerService {
 
         //获取企业的agentid
         QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
-        Integer agentId = company.getAgentId();
+        String agentId = company.getAgentId();
 
         JSONObject postJson = new JSONObject();
         postJson.put("msgtype","image");

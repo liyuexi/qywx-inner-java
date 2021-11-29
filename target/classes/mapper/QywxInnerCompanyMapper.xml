@@ -10,7 +10,7 @@
     </sql>
 
     <insert id="saveCompany"  parameterType="com.tobdev.qywxinner.model.entity.QywxInnerCompany" useGeneratedKeys="true" keyColumn="id" keyProperty="id" >
-        INSERT INTO `qywx_inner_company`( `corp_id`, `permanent_code`,`corp_name`,`corp_full_name`,`subject_type`,`agent_id`,`status`) VALUES (#{corpId,jdbcType=VARCHAR},#{permanentCode,jdbcType=VARCHAR},#{corpName,jdbcType=VARCHAR},#{corpFullName,jdbcType=VARCHAR},#{subjectType,jdbcType=INTEGER},#{agentId,jdbcType=INTEGER},#{status,jdbcType=INTEGER})
+        INSERT INTO `qywx_inner_company`( `corp_id`,`agent_id`,`agent_secret`,`status`) VALUES (#{corpId,jdbcType=VARCHAR},#{agentId,jdbcType=VARCHAR},#{agentSecret,jdbcType=VARCHAR},#{status,jdbcType=INTEGER} )
     </insert>
 
     <select id="getCompanyBaseByCorpId" resultType="com.tobdev.qywxinner.model.entity.QywxInnerCompany">

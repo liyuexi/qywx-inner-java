@@ -5,7 +5,7 @@ public class QywxInnerCompany {
 
     private Integer id;
     private String corpId;
-    private Integer agentId;
+    private String agentId;
     private String agentSecret;
 
     private String corpName;
@@ -82,12 +82,16 @@ public class QywxInnerCompany {
         this.status = status;
     }
 
-    public Integer getAgentId() {
+    public String getAgentId() {
         return agentId;
     }
 
-    public void setAgentId(Integer agentId) {
+    public void setAgentId(String agentId) {
         this.agentId = agentId;
+    }
+
+    public void setAgentSecret(String agentSecret) {
+        this.agentSecret = agentSecret;
     }
 
     public String getAgentSecret() {
