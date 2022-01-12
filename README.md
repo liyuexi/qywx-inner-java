@@ -53,6 +53,30 @@ CREATE TABLE `qywx_inner_company` (
  `rectime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '变动时间',
  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='企业微信自建内部应用公司';
+CREATE TABLE `qywx_third_user` (
+ `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+ `corp_id` varchar(45) NOT NULL DEFAULT '' COMMENT '企业id',
+ `user_id` varchar(100) NOT NULL DEFAULT '' COMMENT '用户id',
+ `name` varchar(50) NOT NULL DEFAULT '' COMMENT '部门名称',
+ `parentid` int(10) NOT NULL DEFAULT '0' COMMENT '父部门id',
+ `position` varchar(100) NOT NULL DEFAULT '0' COMMENT '职位',
+ `gender` char(10) NOT NULL DEFAULT '' COMMENT '性别',
+ `email` char(100) NOT NULL DEFAULT '' COMMENT '邮箱',
+ `is_leader_in_dept` char(10) NOT NULL DEFAULT '' COMMENT '是否是部门负责人',
+ `avatar` varchar(512) NOT NULL DEFAULT '' COMMENT '头像',
+ `thumb_avatar` varchar(512) NOT NULL DEFAULT '' COMMENT '头像缩略图',
+ `telephone` char(50) NOT NULL DEFAULT '' COMMENT '电话',
+ `alias` char(50) NOT NULL DEFAULT '' COMMENT '别吃饭去',
+ `address` varchar(100) NOT NULL DEFAULT '' COMMENT '地址',
+ `open_userid` varchar(100) NOT NULL DEFAULT '' COMMENT 'open_userid',
+ `main_department` int(10) NOT NULL DEFAULT '0' COMMENT '主部门id',
+ `qr_code` varchar(512) NOT NULL DEFAULT '' COMMENT '二维码',
+ `status` tinyint(3) DEFAULT '0' COMMENT '状态，-1为删除，禁用为0 启用为1',
+ `addtime` int(10) unsigned DEFAULT '0' COMMENT '创建时间',
+ `modtime` int(10) unsigned DEFAULT '0' COMMENT '修改时间',
+ `rectime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '变动时间',
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 COMMENT='企业微信人员';
 
 #20210928
 ALTER TABLE `qywx_inner_company` ADD `approval_template_id` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '审批流程引擎模板id' AFTER `verified_end_time`;
