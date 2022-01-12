@@ -68,6 +68,15 @@ public class TobDevController {
 
     }
 
+
+    @GetMapping({"/tobdev/get"})
+    JsonData getAgent(HttpServletRequest request ,@RequestParam("corp_id") String corpId){
+
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
+        return    JsonData.buildSuccess(company);
+
+    }
+
     @PostMapping({"/tobdev/verifyFile"})
     JsonData upload(HttpServletRequest request ,@RequestParam("file") MultipartFile file){
 

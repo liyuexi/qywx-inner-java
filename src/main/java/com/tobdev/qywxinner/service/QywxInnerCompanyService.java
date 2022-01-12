@@ -58,8 +58,8 @@ public class QywxInnerCompanyService  {
         //删除公司
         Integer comResult =   qywxInnerCompanyMapper.deleteCompanyByCorpId(corpId);
 
-        //删除部门
-        Boolean deptResult =   qywxInnerDepartmentService.deleteDepartmentByCorpId(corpId);
+//        //删除部门
+//        Boolean deptResult =   qywxInnerDepartmentService.deleteDepartmentByCorpId(corpId);
         //删除人
         Boolean usrResult =   qywxInnerUserService.deleteUserByCorpId(corpId);
 

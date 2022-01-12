@@ -7,7 +7,8 @@ public class QywxInnerCompany {
     private String corpId;
     private String agentId;
     private String agentSecret;
-
+    private String agentEncodingAeskey;
+    private String agentToken;
     private String corpName;
     private String corpFullName;
     private Integer subjectType;
@@ -96,5 +97,21 @@ public class QywxInnerCompany {
 
     public String getAgentSecret() {
         return agentSecret;
+    }
+
+    public String getAgentEncodingAeskey() {
+        return agentEncodingAeskey;
+    }
+
+    public void setAgentEncodingAeskey(String agentEncodingAeskey) {
+        this.agentEncodingAeskey = agentEncodingAeskey;
+    }
+
+    public String getAgentToken() {
+        return agentToken;
+    }
+
+    public void setAgentToken(String agentToken) {
+        this.agentToken = agentToken;
     }
 }

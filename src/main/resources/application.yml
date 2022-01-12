@@ -1,4 +1,4 @@
 spring:
- profiles:
-  active: testh5
+  profiles:
+    active: dev
 

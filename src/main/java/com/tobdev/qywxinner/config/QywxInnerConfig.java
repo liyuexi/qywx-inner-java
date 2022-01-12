@@ -19,6 +19,11 @@ public class QywxInnerConfig {
 
     private String baseUrl = "https://qyapi.weixin.qq.com/cgi-bin/";
 
+    //服务商相关
+    private String serviceUrl = baseUrl+"service/";
+    private String suiteTokenUrl = serviceUrl+"get_suite_token";
+    private String permanentCodeUrl = serviceUrl+"get_permanent_code?suite_access_token=%s";
+
     //获取access_token
     //https://open.work.weixin.qq.com/api/doc/90000/90135/91039
     private String accessTokenUrl = baseUrl+"gettoken?corpid=%s&corpsecret=%s";
@@ -132,6 +137,15 @@ public class QywxInnerConfig {
     //code2Session https://work.weixin.qq.com/api/doc/90000/90136/91507
     private String code2sessionUrl = baseUrl+"miniprogram/jscode2session?access_token=%s&js_code=%s&grant_type=authorization_code";
 
+
+    public String getSuiteTokenUrl() {
+        return suiteTokenUrl;
+    }
+
+
+    public String getPermanentCodeUrl() {
+        return permanentCodeUrl;
+    }
 
     public String getJsapiTicketUrl() {
         return jsapiTicketUrl;

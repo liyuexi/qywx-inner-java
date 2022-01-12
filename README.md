@@ -57,8 +57,10 @@ CREATE TABLE `qywx_inner_company` (
 #20210928
 ALTER TABLE `qywx_inner_company` ADD `approval_template_id` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '审批流程引擎模板id' AFTER `verified_end_time`;
 #20211127
-ALTER TABLE `qywx_inner_company` CHANGE `agent_id` `agent_id` VARCHAR(1045) NULL DEFAULT '' COMMENT '授权应用id';
-
+ALTER TABLE `qywx_inner_company` CHANGE `agent_id` `agent_id` VARCHAR(100) NULL DEFAULT '' COMMENT '授权应用id';
+#20211215
+ALTER TABLE `qywx_inner_company` ADD `agent_token` VARCHAR(150) NOT NULL DEFAULT '' COMMENT 'token' AFTER `agent_secret` ;
+ALTER TABLE `qywx_inner_company` ADD `agent_encoding_aes_key` VARCHAR(150) NOT NULL DEFAULT '' COMMENT 'encoding_aes_key' AFTER `agent_token`;
 ```
 
 ### 扫码联系

@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.tobdev.qywxinner.config.QywxCacheConfig;
 import com.tobdev.qywxinner.config.QywxInnerConfig;
 import com.tobdev.qywxinner.model.entity.QywxInnerCompany;
+import com.tobdev.qywxinner.qywxdecode.AesException;
+import com.tobdev.qywxinner.qywxdecode.WXBizMsgCrypt;
 import com.tobdev.qywxinner.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,8 +17,15 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -54,6 +63,142 @@ public class QywxInnerService {
         }
 
         return result;
+
+    }
+
+    //********************************** 回调处理   *************************//
+    /**
+     * 回调url验证 get请求
+     * @param sVerifyMsgSig
+     * @param sVerifyTimeStamp
+     * @param sVerifyNonce
+     * @param sVerifyEchoStr
+     * @return
+     */
+    public String verify(String corpId,String sVerifyMsgSig,String sVerifyTimeStamp,
+                         String sVerifyNonce,String sVerifyEchoStr){
+
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
+        String sToken = company.getAgentToken();
+        String sCorpID = corpId;
+        String sEncodingAESKey = company.getAgentEncodingAeskey();
+
+        WXBizMsgCrypt wxcpt = null;
+        try {
+            wxcpt = new WXBizMsgCrypt(sToken, sEncodingAESKey, sCorpID);
+        }catch (AesException E){
+            return "error";
+        }
+
+		/*
+		------------使用示例一：验证回调URL---------------
+		*企业开启回调模式时，企业微信会向验证url发送一个get请求
+		假设点击验证时，企业收到类似请求：
+		* GET /cgi-bin/wxpush?msg_signature=5c45ff5e21c57e6ad56bac8758b79b1d9ac89fd3&timestamp=1409659589&nonce=263014780&echostr=P9nAzCzyDtyTWESHep1vC5X9xho%2FqYX3Zpb4yKa9SKld1DsH3Iyt3tP3zNdtp%2B4RPcs8TgAE7OaBO%2BFZXvnaqQ%3D%3D
+		* HTTP/1.1 Host: qy.weixin.qq.com
+
+		接收到该请求时，企业应		1.解析出Get请求的参数，包括消息体签名(msg_signature)，时间戳(timestamp)，随机数字串(nonce)以及企业微信推送过来的随机加密字符串(echostr),
+		这一步注意作URL解码。
+		2.验证消息体签名的正确性
+		3. 解密出echostr原文，将原文当作Get请求的response，返回给企业微信
+		第2，3步可以用企业微信提供的库函数VerifyURL来实现。
+
+		*/
+        String sEchoStr; //需要返回的明文
+        try {
+            sEchoStr = wxcpt.VerifyURL(sVerifyMsgSig, sVerifyTimeStamp,
+                    sVerifyNonce, sVerifyEchoStr);
+            //System.out.println("verifyurl echostr: " + sEchoStr);
+            // 验证URL成功，将sEchoStr返回
+            // HttpUtils.SetResponse(sEchoStr);
+        } catch (Exception e) {
+            //验证URL失败，错误原因请查看异常
+            e.printStackTrace();
+            return "error";
+        }
+        return  sEchoStr;
+
+    }
+
+    /**
+     * 回调接收 post请求处理
+     * @param sVerifyMsgSig
+     * @param sVerifyTimeStamp
+     * @param sVerifyNonce
+     * @param sData
+     * @return
+     */
+    public  String callback(String sVerifyMsgSig,String sVerifyTimeStamp,String sVerifyNonce,String sData){
+
+        // 密钥，公众账号的app secret
+        // 提取密文
+        String corpId="";
+        try {
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            StringReader sr = new StringReader(sData);
+            InputSource is = new InputSource(sr);
+            Document document = db.parse(is);
+
+            Element root = document.getDocumentElement();
+            NodeList infoTypeNode = root.getElementsByTagName("ToUserName");
+            corpId = infoTypeNode.item(0).getTextContent();
+        }catch(Exception e)
+        {
+            e.printStackTrace();
+            // 加密失败
+
+        }
+        System.out.println("corpid:"+corpId);
+        QywxInnerCompany company =  qywxInnerCompanyService.getCompanyByCorpId(corpId);
+
+        //处理回调
+        String sToken = company.getAgentToken();
+        String sSuiteid = corpId;
+        String sEncodingAESKey = company.getAgentEncodingAeskey();
+        System.out.println("sSuiteid:"+sSuiteid);
+
+        String result = "error";
+        WXBizMsgCrypt wxcpt = null;
+        try {
+            wxcpt = new WXBizMsgCrypt(sToken, sEncodingAESKey, sSuiteid);
+        }catch (AesException E){
+            return result;
+        }
+        try{
+            String sMsg = wxcpt.DecryptMsg(sVerifyMsgSig, sVerifyTimeStamp, sVerifyNonce, sData);
+            System.out.println("after encrypt sEncrytMsg: " + sMsg);
+            // 加密成功
+            // TODO: 解析出明文xml标签的内容进行处理
+            // For example:
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            StringReader sr = new StringReader(sMsg);
+            InputSource is = new InputSource(sr);
+            Document document = db.parse(is);
+
+            Element root = document.getDocumentElement();
+            NodeList msgTypeNode = root.getElementsByTagName("MsgType");
+            String msgType = msgTypeNode.item(0).getTextContent();
+            System.out.print(msgType);
+            switch (msgType){
+                case "subscribe" :
+
+
+                    break;
+
+                default:
+                    // logger.info(infoType);
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            // 加密失败
+            return result;
+        }
+        result = "success";
+        return  result;
 
     }
 
