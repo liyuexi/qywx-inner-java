@@ -37,6 +37,11 @@ springboot,mysql
 
 将应用信息填写入表中
 ```sql 
+CREATE DATABASE  `qywx_inner_demo_h5` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'qywx_inner_demo_h5'@'%'   IDENTIFIED BY 'qywx_inner_demo_h5';
+GRANT ALL ON qywx_inner_demo_h5.* TO 'qywx_inner_demo_h5'@'%';
+
+
 CREATE TABLE `qywx_inner_company` (
  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
  `app_id` int(10) unsigned NOT NULL DEFAULT '1' COMMENT 'tobdev应用id 可以不写',
@@ -53,7 +58,7 @@ CREATE TABLE `qywx_inner_company` (
  `rectime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '变动时间',
  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='企业微信自建内部应用公司';
-CREATE TABLE `qywx_third_user` (
+CREATE TABLE `qywx_inner_user` (
  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
  `corp_id` varchar(45) NOT NULL DEFAULT '' COMMENT '企业id',
  `user_id` varchar(100) NOT NULL DEFAULT '' COMMENT '用户id',
