@@ -1,41 +1,63 @@
 ## 联系我们
 ToB Dev 李月喜专注B端企业服务开发，微信/企业微信开发；       
-ToB Dev网址: wx.tobdev.com（完善中）;   
+ToB Dev网址: www.tobdev.com;   
 加企业微信开发同行群及咨询联系李月喜"li570467731";    
 获取更多企业微信教程及资料关注公众号ToB Dev 微信号“tobdev”;  
 
-## 企业微信自自建内部应用  
+## 企业微信自自建内部应用/自建代开发应用  
 自建内部应用视频教程：  
-https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzA5ODcyODY0Nw==&action=getalbum&album_id=1745513894715916289#wechat_redirect  
+https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzA5ODcyODY0Nw==&action=getalbum&album_id=1745513894715916289#wechat_redirect    
+https://ke.qq.com/course/4159768  
 
-自建内部应用demo源码：  
+自建代开发视频教程：  
+https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzA5ODcyODY0Nw==&action=getalbum&album_id=2167362871330930690#wechat_redirect  
+https://ke.qq.com/course/5411662  
+
+自建内部应用/自建代开发应用demo源码：  
 前端vite+vuejs:  
 https://github.com/liyuexi/qywx-vuejs  
-https://gitee.com/liyuexi/qywx-vuejs      
+https://gitee.com/liyuexi/qywx-vuejs   
+小程序：  
+https://github.com/liyuexi/qywx-xcx  
+https://gitee.com/liyuexi/qywx-xcx  
 后端java+springboot:    
 https://github.com/liyuexi/qywx-inner-java     
 https://gitee.com/liyuexi/qywx-inner-java     
 
-在线Demo地址：  
+自建内部在线Demo地址：  
 http://h5test.tobdev.com    
 进入应用后点菜单设置进行应用设置
+  
+自建代开发在线Demo地址：  
+准备中
 
-##企业微信自自建内部应用后端demo
-### 在线Demo
-http://h5test.tobdev.com  
-进入应用后点菜单设置进行应用设置
 
-### 最近更新  
-2021/11/29 增加在线Demo及调试工具
-
-### demo简介  
-本项目为企业微信自建内部应用后端demo
-自建应用代开发更新支持中...敬请期待  
+### 本Demo简介
+本项目为企业微信自建内部应用/自建代开发应用 后端demo
 https://github.com/liyuexi/qywx-inner-java    
 https://gitee.com/liyuexi/qywx-inner-java        
-springboot,mysql 
+springboot,mysql,redis  
+需要启用redis用于缓存suiteticket等信息；
+需要启用msyql建立数据库及对应的表，用于存储企业及应用等信息；
 
-将应用信息填写入表中
+### 源码相关
+基于java springboot开发；  
+需要启用redis用于缓存suiteticket等信息；   
+需要启用msyql建立数据库及对应的表，用于存储企业及应用等信息；  
+### 配置
+#### 环境配置
+- 先配置好环境，初始化数据库（sql在后面），及redis等    
+- 再配置application.yml文件active, 自建应用配置直接是写qywx_inner_company表
+- 如果是代开发应用需application.yml中配置corpId等服务商及代开发模板应用相关配置等...  
+- 配置好域名，如果是本地调试，配置好内网穿透
+- 回调配置设置回调链接，看加调get验证是否正常，如果正常点刷新ticket  
+- 注意：如是本地调试，ip经常变动，服务商信息里设置好ip白名单，另ticket是十分钟一次如失效或者过期上应用设置里手动刷新即可  
+
+#### 应用配置
+- 如果是代开发 代开发模板回调URL	http://域名:端口/callback
+- 如果是代开发或者自建 应用/代开发应用回调URL	http:///域名:端口/callback/company
+- 前端   见前端项目
+##### 库表sql如下
 ```sql 
 CREATE DATABASE  `qywx_inner_demo_h5` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'qywx_inner_demo_h5'@'%'   IDENTIFIED BY 'qywx_inner_demo_h5';
@@ -87,10 +109,12 @@ CREATE TABLE `qywx_inner_user` (
 ALTER TABLE `qywx_inner_company` ADD `approval_template_id` VARCHAR(100) NOT NULL DEFAULT '' COMMENT '审批流程引擎模板id' AFTER `verified_end_time`;
 #20211127
 ALTER TABLE `qywx_inner_company` CHANGE `agent_id` `agent_id` VARCHAR(100) NULL DEFAULT '' COMMENT '授权应用id';
-#20211215
-ALTER TABLE `qywx_inner_company` ADD `agent_token` VARCHAR(150) NOT NULL DEFAULT '' COMMENT 'token' AFTER `agent_secret` ;
-ALTER TABLE `qywx_inner_company` ADD `agent_encoding_aes_key` VARCHAR(150) NOT NULL DEFAULT '' COMMENT 'encoding_aes_key' AFTER `agent_token`;
+#20211215 自建代开发应用支持等
+ALTER TABLE `qywx_inner_company` ADD `agent_token` VARCHAR(150) NOT NULL DEFAULT '' COMMENT '应用token' COMMENT '审批流程引擎模板id' AFTER `agent_secret` ;
+ALTER TABLE `qywx_inner_company` ADD `agent_encoding_aes_key` VARCHAR(150) NOT NULL DEFAULT '应用agent_encoding_aes_key' COMMENT 'encoding_aes_key' AFTER `agent_token`;
+
 ```
+
 
 ### 扫码联系
 ToB Dev公众号：  
